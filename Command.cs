@@ -5,7 +5,46 @@ using System.Text;
 
 namespace SignalDelay
 {
-    public enum CommandType { LAUNCH_STAGES, PITCH_DOWN, PITCH_UP, YAW_LEFT, YAW_RIGHT, ROLL_LEFT, ROLL_RIGHT, TRANSLATE_FWD, TRANSLATE_BACK, TRANSLATE_DOWN, TRANSLATE_UP, TRANSLATE_LEFT, TRANSLATE_RIGHT, THROTTLE_CUTOFF, THROTTLE_FULL, THROTTLE_DOWN, THROTTLE_UP, WHEEL_STEER_LEFT, WHEEL_STEER_RIGHT, WHEEL_THROTTLE_DOWN, WHEEL_THROTTLE_UP, LANDING_GEAR, SAS_TOGGLE, SAS_HOLD };
+    public enum CommandType
+    {
+        LAUNCH_STAGES,
+        PITCH_DOWN,
+        PITCH_UP,
+        YAW_LEFT,
+        YAW_RIGHT,
+        ROLL_LEFT,
+        ROLL_RIGHT,
+        TRANSLATE_FWD,
+        TRANSLATE_BACK,
+        TRANSLATE_DOWN,
+        TRANSLATE_UP,
+        TRANSLATE_LEFT,
+        TRANSLATE_RIGHT,
+        THROTTLE_CUTOFF,
+        THROTTLE_FULL,
+        THROTTLE_DOWN,
+        THROTTLE_UP,
+        WHEEL_STEER_LEFT,
+        WHEEL_STEER_RIGHT,
+        WHEEL_THROTTLE_DOWN,
+        WHEEL_THROTTLE_UP,
+        LIGHT_TOGGLE,
+        LANDING_GEAR,
+        BRAKES,
+        RCS_TOGGLE,
+        SAS_TOGGLE,
+        ABORT,
+        ACTIONGROUP1,
+        ACTIONGROUP2,
+        ACTIONGROUP3,
+        ACTIONGROUP4,
+        ACTIONGROUP5,
+        ACTIONGROUP6,
+        ACTIONGROUP7,
+        ACTIONGROUP8,
+        ACTIONGROUP9,
+        ACTIONGROUP10
+    };
 
     public class Command
     {
@@ -39,6 +78,13 @@ namespace SignalDelay
                     SignalDelayScenario.FlightCtrlState.roll = 1;
                     break;
                 case CommandType.TRANSLATE_FWD:
+                    v.Translate(new Vector3d(1, 0, 0));
+                    break;
+                case CommandType.TRANSLATE_UP:
+                    v.Translate(new Vector3d(0, 1, 0));
+                    break;
+                case CommandType.TRANSLATE_RIGHT:
+                    v.Translate(new Vector3d(0, 0, 1));
                     break;
                 case CommandType.THROTTLE_CUTOFF:
                     SignalDelayScenario.FlightCtrlState.mainThrottle = 0;
@@ -52,13 +98,75 @@ namespace SignalDelay
                 case CommandType.THROTTLE_UP:
                     SignalDelayScenario.FlightCtrlState.mainThrottle += 0.01f;
                     break;
+                case CommandType.LIGHT_TOGGLE:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Light);
+                    break;
                 case CommandType.LANDING_GEAR:
-                    SignalDelayScenario.FlightCtrlState.gearDown = !SignalDelayScenario.FlightCtrlState.gearDown;
-                    //SignalDelayScenario.FlightCtrlState.gearUp = !SignalDelayScenario.FlightCtrlState.gearUp;
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Gear);
+                    break;
+                case CommandType.BRAKES:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Brakes);
+                    break;
+                case CommandType.RCS_TOGGLE:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.RCS);
+                    break;
+                case CommandType.SAS_TOGGLE:
+                    Core.Log("Autopilot is " + (v.Autopilot.Enabled ? "enabled" : "disabled") + " in " + v.Autopilot.Mode + " mode.");
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.SAS);
+                    break;
+                case CommandType.ABORT:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Abort);
+                    break;
+                case CommandType.ACTIONGROUP1:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom01);
+                    break;
+                case CommandType.ACTIONGROUP2:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom02);
+                    break;
+                case CommandType.ACTIONGROUP3:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom03);
+                    break;
+                case CommandType.ACTIONGROUP4:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom04);
+                    break;
+                case CommandType.ACTIONGROUP5:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom05);
+                    break;
+                case CommandType.ACTIONGROUP6:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom06);
+                    break;
+                case CommandType.ACTIONGROUP7:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom07);
+                    break;
+                case CommandType.ACTIONGROUP8:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom08);
+                    break;
+                case CommandType.ACTIONGROUP9:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom09);
+                    break;
+                case CommandType.ACTIONGROUP10:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom10);
                     break;
                 default:
-                    Core.Log("Unimplemented command " + Type);
+                    Core.Log("Unimplemented command " + Type, Core.LogLevel.Error);
                     break;
+            }
+        }
+
+        public ConfigNode ConfigNode
+        {
+            get
+            {
+                ConfigNode node = new ConfigNode("Command");
+                node.AddValue("type", Type.ToString());
+                node.AddValue("time", Time);
+                return node;
+            }
+            set
+            {
+                try { Type = (CommandType)Enum.Parse(typeof(CommandType), value.GetValue("type")); }
+                catch (Exception) { Core.Log("Could not parse command type for this command: " + value, Core.LogLevel.Error); }
+                Time = Core.GetDouble(value, "time");
             }
         }
 
@@ -70,5 +178,8 @@ namespace SignalDelay
             Type = type;
             Time = time;
         }
+
+        public Command(ConfigNode node)
+        { ConfigNode = node; }
     }
 }

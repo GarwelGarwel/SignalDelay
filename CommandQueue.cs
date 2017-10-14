@@ -33,5 +33,29 @@ namespace SignalDelay
                 return Peek().Time;
             }
         }
+
+        public ConfigNode ConfigNode
+        {
+            get
+            {
+                ConfigNode node = new ConfigNode("CommandQueue");
+                foreach (Command c in this)
+                    node.AddNode(c.ConfigNode);
+                Core.Log(node.CountNodes + " commands saved.");
+                return node;
+            }
+            set
+            {
+                foreach (ConfigNode n in value.GetNodes("Command"))
+                    Enqueue(new Command(n));
+                Core.Log(value.GetNodes("Command").Length + " commands loaded.");
+            }
+        }
+
+        public CommandQueue() : base()
+        { }
+
+        public CommandQueue(ConfigNode node) : base(node.CountNodes)
+        { ConfigNode = node; }
     }
 }

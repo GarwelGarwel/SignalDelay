@@ -1,12 +1,20 @@
-﻿using UnityEngine;
-using KSP.UI.Screens;
+﻿using System;
+using UnityEngine;
 
 namespace SignalDelay
 {
     class Core
     {
         public static double LightSpeed
-        { get { return 150000; } }
+        { get { return SignalDelaySettings.LightSpeed / (SignalDelaySettings.RoundTrip ? 2 : 1); } }
+
+        public static double GetDouble(ConfigNode n, string key, double defaultValue = 0)
+        {
+            double res;
+            try { res = Double.Parse(n.GetValue(key)); }
+            catch (Exception) { res = defaultValue; }
+            return res;
+        }
 
         public static void ShowNotification(string msg)
         { ScreenMessages.PostScreenMessage(msg); }
@@ -26,7 +34,7 @@ namespace SignalDelay
         /// Current <see cref="LogLevel"/>: either Debug or Important
         /// </summary>
         public static LogLevel Level
-        { get { return LogLevel.Debug; } }
+        { get { return SignalDelaySettings.DebugMode ? LogLevel.Debug : LogLevel.Important; } }
 
         /// <summary>
         /// Write into output_log.txt
