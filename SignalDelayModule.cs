@@ -13,7 +13,6 @@ namespace SignalDelay
         protected override void OnSave(ConfigNode node)
         {
             Core.Log("Saving SignalDelayModule for " + Vessel.vesselName + ". Scene is " + HighLogic.LoadedScene + ". Active vessel is " + FlightGlobals.ActiveVessel?.vesselName + ".");
-            //Core.Log("Saving SignalDelayModule for " + Vessel.vesselName + ".");
             node.AddNode(Queue.ConfigNode);
         }
 

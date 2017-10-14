@@ -10,7 +10,7 @@ namespace SignalDelay
         public void Enqueue(CommandType command)
         {
             Core.Log("Adding command " + command + " at " + Planetarium.GetUniversalTime() + ".");
-            Core.ShowNotification("Input: " + command.ToString());
+            if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + command.ToString());
             base.Enqueue(new Command(command, Planetarium.GetUniversalTime() + Delay));
         }
 
@@ -18,7 +18,7 @@ namespace SignalDelay
         {
             Command res = base.Dequeue();
             Core.Log("Executing command " + res + ".");
-            Core.ShowNotification("Execute: " + res.Type);
+            if (SignalDelaySettings.DebugMode) Core.ShowNotification("Execute: " + res.Type);
             res.Execute();
             return res;
         }

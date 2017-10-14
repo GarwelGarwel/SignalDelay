@@ -33,6 +33,7 @@ namespace SignalDelay
         BRAKES,
         RCS_TOGGLE,
         SAS_TOGGLE,
+        SAS_HOLD,
         ABORT,
         ACTIONGROUP1,
         ACTIONGROUP2,
@@ -60,22 +61,22 @@ namespace SignalDelay
                     KSP.UI.Screens.StageManager.ActivateNextStage();
                     break;
                 case CommandType.PITCH_DOWN:
-                    SignalDelayScenario.FlightCtrlState.pitch = -1;
+                    SignalDelayScenario.FCSChange.pitch = -1;
                     break;
                 case CommandType.PITCH_UP:
-                    SignalDelayScenario.FlightCtrlState.pitch = 1;
+                    SignalDelayScenario.FCSChange.pitch = 1;
                     break;
                 case CommandType.YAW_LEFT:
-                    SignalDelayScenario.FlightCtrlState.yaw = -1;
+                    SignalDelayScenario.FCSChange.yaw = -1;
                     break;
                 case CommandType.YAW_RIGHT:
-                    SignalDelayScenario.FlightCtrlState.yaw = 1;
+                    SignalDelayScenario.FCSChange.yaw = 1;
                     break;
                 case CommandType.ROLL_LEFT:
-                    SignalDelayScenario.FlightCtrlState.roll = -1;
+                    SignalDelayScenario.FCSChange.roll = -1;
                     break;
                 case CommandType.ROLL_RIGHT:
-                    SignalDelayScenario.FlightCtrlState.roll = 1;
+                    SignalDelayScenario.FCSChange.roll = 1;
                     break;
                 case CommandType.TRANSLATE_FWD:
                     v.Translate(new Vector3d(1, 0, 0));
@@ -87,16 +88,16 @@ namespace SignalDelay
                     v.Translate(new Vector3d(0, 0, 1));
                     break;
                 case CommandType.THROTTLE_CUTOFF:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle = 0;
+                    SignalDelayScenario.FCSChange.mainThrottle = 0;
                     break;
                 case CommandType.THROTTLE_FULL:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle = 1;
+                    SignalDelayScenario.FCSChange.mainThrottle = 1;
                     break;
                 case CommandType.THROTTLE_DOWN:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle -= 0.01f;
+                    SignalDelayScenario.FCSChange.mainThrottle -= 0.01f;
                     break;
                 case CommandType.THROTTLE_UP:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle += 0.01f;
+                    SignalDelayScenario.FCSChange.mainThrottle += 0.01f;
                     break;
                 case CommandType.LIGHT_TOGGLE:
                     v.ActionGroups.ToggleGroup(KSPActionGroup.Light);
@@ -112,7 +113,12 @@ namespace SignalDelay
                     break;
                 case CommandType.SAS_TOGGLE:
                     Core.Log("Autopilot is " + (v.Autopilot.Enabled ? "enabled" : "disabled") + " in " + v.Autopilot.Mode + " mode.");
+                    //SignalDelayScenario.SASLock = !SignalDelayScenario.SASLock;
                     v.ActionGroups.ToggleGroup(KSPActionGroup.SAS);
+                    break;
+                case CommandType.SAS_HOLD:
+                    Core.Log("Autopilot is " + (v.Autopilot.Enabled ? "enabled" : "disabled") + " in " + v.Autopilot.Mode + " mode.");
+                    //SignalDelayScenario.SASHold = true;
                     break;
                 case CommandType.ABORT:
                     v.ActionGroups.ToggleGroup(KSPActionGroup.Abort);

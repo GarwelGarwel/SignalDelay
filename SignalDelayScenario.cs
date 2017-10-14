@@ -9,27 +9,21 @@ namespace SignalDelay
         {
             Core.Log("Start");
             Vessel.OnFlyByWire += OnFlyByWire;
-            GameEvents.CommNet.OnNetworkInitialized.Add(CheckVessel);
-            GameEvents.CommNet.OnCommStatusChange.Add(OnCommStatusChange);
-            GameEvents.onFlightReady.Add(CheckVessel);
-            GameEvents.onVesselSwitching.Add(OnVesselSwitching);
-            GameEvents.onVesselLoaded.Add(CheckVessel);
+            //SASLock = Vessel.Autopilot.Enabled;
         }
 
         public void OnDisable()
         { 
             Core.Log("OnDisable");
-            GameEvents.CommNet.OnNetworkInitialized.Remove(CheckVessel);
-            GameEvents.CommNet.OnCommStatusChange.Remove(OnCommStatusChange);
-            GameEvents.onFlightReady.Remove(CheckVessel);
-            GameEvents.onVesselSwitching.Remove(OnVesselSwitching);
-            GameEvents.onVesselLoaded.Remove(CheckVessel);
             Active = false;
         }
 
         Vessel Vessel { get { return FlightGlobals.ActiveVessel; } }
 
-        public static FlightCtrlState FlightCtrlState { get; set; }
+        public static FlightCtrlState FCSChange { get; set; }
+
+        //public static bool SASLock { get; set; }
+        //public static bool SASHold { get; set; } = false;
 
         public CommandQueue Queue
         {
@@ -52,13 +46,12 @@ namespace SignalDelay
             get { return active; }
             set
             {
-                Core.Log("Active = " + value);
                 if (value == active) return;
+                Core.Log("Active = " + value);
                 active = value;
                 if (active)
                 {
-                    FlightCtrlState = new FlightCtrlState();
-                    FlightCtrlState.CopyFrom(Vessel.ctrlState);
+                    FCSChange = new FlightCtrlState();
                     InputLockManager.SetControlLock(SignalDelaySettings.HidePartActions ? ControlTypes.ALL_SHIP_CONTROLS : ControlTypes.ALL_SHIP_CONTROLS ^ ControlTypes.ACTIONS_SHIP, "this");
                     if (SignalDelaySettings.DebugMode) Core.ShowNotification("Delay activated.");
                 }
@@ -70,41 +63,26 @@ namespace SignalDelay
             }
         }
 
-        public void OnFlyByWire(FlightCtrlState fcs)
-        { if (Active && !Vessel.Autopilot.Enabled) fcs.CopyFrom(FlightCtrlState); }
-
-        public void CheckVessel(Vessel v)
-        {
-            Core.Log("Vessel is " + (v.Connection.IsConnected ? "" : "not ") + "connected, control state is " + v.Connection.ControlState + " (" + (int)v.Connection.ControlState + ").");
-            Active = SignalDelaySettings.IsEnabled && v.Connection.IsConnected && (v.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe;
-        }
-
         public void CheckVessel()
-        { CheckVessel(Vessel); }
-
-        public void OnCommStatusChange(Vessel v, bool b)
         {
-            Core.Log("OnCommStatusChange(" + v.vesselName + ", " + b + ")");
-            if (v != Vessel)
+            //Core.Log("Vessel is " + (Vessel.Connection.IsConnected ? "" : "not ") + "connected, control state is " + Vessel.Connection.ControlState + " (" + (int)Vessel.Connection.ControlState + ").");
+            Active = SignalDelaySettings.IsEnabled && Vessel.Connection.IsConnected && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe;
+        }
+
+        public void OnFlyByWire(FlightCtrlState fcs)
+        {
+            if (Active)
             {
-                Core.Log(v.vesselName + " is not the active vessel, aborting.");
-                return;
+                fcs.pitch += FCSChange.pitch;
+                fcs.yaw += FCSChange.yaw;
+                fcs.roll += FCSChange.roll;
+                fcs.mainThrottle = FCSChange.mainThrottle;
             }
-            CheckVessel();
         }
 
-        public void OnVesselSwitching(Vessel from, Vessel to)
+        public void Update()
         {
-            Core.Log("OnVesselSwitching(" + from.vesselName + ", " + to.vesselName + ")");
-            Core.Log("Active Vessel is " + Vessel.vesselName);
-            CheckVessel(to);
-        }
-
-        bool SameFCS(FlightCtrlState fcs1, FlightCtrlState fcs2)
-        { return fcs1.pitch == fcs2.pitch && fcs1.yaw == fcs2.yaw && fcs1.roll == fcs2.roll && fcs1.mainThrottle == fcs2.mainThrottle; }
-
-        void RegisterInput()
-        {
+            if (!Active) return;
             if (GameSettings.LAUNCH_STAGES.GetKeyDown()) Queue.Enqueue(CommandType.LAUNCH_STAGES);
             if (GameSettings.PITCH_DOWN.GetKey()) Queue.Enqueue(CommandType.PITCH_DOWN);
             if (GameSettings.PITCH_UP.GetKey()) Queue.Enqueue(CommandType.PITCH_UP);
@@ -127,6 +105,7 @@ namespace SignalDelay
             if (GameSettings.BRAKES.GetKeyDown()) Queue.Enqueue(CommandType.BRAKES);
             if (GameSettings.RCS_TOGGLE.GetKeyDown()) Queue.Enqueue(CommandType.RCS_TOGGLE);
             if (GameSettings.SAS_TOGGLE.GetKeyDown()) Queue.Enqueue(CommandType.SAS_TOGGLE);
+            if (GameSettings.SAS_HOLD.GetKey()) Queue.Enqueue(CommandType.SAS_HOLD);
             if (GameSettings.AbortActionGroup.GetKeyDown()) Queue.Enqueue(CommandType.ABORT);
             if (GameSettings.CustomActionGroup1.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP1);
             if (GameSettings.CustomActionGroup2.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP2);
@@ -138,16 +117,6 @@ namespace SignalDelay
             if (GameSettings.CustomActionGroup8.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP8);
             if (GameSettings.CustomActionGroup9.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP9);
             if (GameSettings.CustomActionGroup10.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP10);
-        }
-
-        FlightCtrlState fcs = new FlightCtrlState();
-        public void Update()
-        {
-            if (!Active) return;
-            FlightCtrlState newFCS = new FlightCtrlState();
-            newFCS.CopyFrom(Vessel.ctrlState);
-            if (!SameFCS(fcs, newFCS)) fcs.CopyFrom(newFCS);
-            RegisterInput();
         }
 
         double GetDelay()
@@ -173,8 +142,8 @@ namespace SignalDelay
         ScreenMessage delayMsg = new ScreenMessage("", 5, ScreenMessageStyle.UPPER_LEFT);
         public void FixedUpdate()
         {
-            //CheckVessel();
-            FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = 0;
+            CheckVessel();
+            FCSChange.pitch = FCSChange.yaw = FCSChange.roll = 0;
             while (Planetarium.GetUniversalTime() >= Queue.NextCommandTime)
                 Queue.Dequeue();
             if (!Active) return;
