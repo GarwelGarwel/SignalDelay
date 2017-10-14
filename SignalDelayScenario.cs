@@ -5,6 +5,8 @@ namespace SignalDelay
     [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.FLIGHT)]
     public class SignalDelayScenario : ScenarioModule
     {
+        // LIFE CYCLE METHODS
+
         public void Start()
         {
             Core.Log("Start");
@@ -18,27 +20,63 @@ namespace SignalDelay
             Active = false;
         }
 
-        Vessel Vessel { get { return FlightGlobals.ActiveVessel; } }
-
-        public static FlightCtrlState FCSChange { get; set; }
-
-        //public static bool SASLock { get; set; }
-        //public static bool SASHold { get; set; } = false;
-
-        public CommandQueue Queue
+        public void Update()
         {
-            get
+            if (!Active) return;
+            if (GameSettings.LAUNCH_STAGES.GetKeyDown()) Enqueue(CommandType.LAUNCH_STAGES);
+            if (GameSettings.PITCH_DOWN.GetKey()) Enqueue(CommandType.PITCH_DOWN);
+            if (GameSettings.PITCH_UP.GetKey()) Enqueue(CommandType.PITCH_UP);
+            if (GameSettings.YAW_LEFT.GetKey()) Enqueue(CommandType.YAW_LEFT);
+            if (GameSettings.YAW_RIGHT.GetKey()) Enqueue(CommandType.YAW_RIGHT);
+            if (GameSettings.ROLL_LEFT.GetKey()) Enqueue(CommandType.ROLL_LEFT);
+            if (GameSettings.ROLL_RIGHT.GetKey()) Enqueue(CommandType.ROLL_RIGHT);
+            if (GameSettings.TRANSLATE_FWD.GetKey()) Enqueue(CommandType.TRANSLATE_FWD);
+            if (GameSettings.TRANSLATE_BACK.GetKey()) Enqueue(CommandType.TRANSLATE_BACK);
+            if (GameSettings.TRANSLATE_DOWN.GetKey()) Enqueue(CommandType.TRANSLATE_DOWN);
+            if (GameSettings.TRANSLATE_UP.GetKey()) Enqueue(CommandType.TRANSLATE_UP);
+            if (GameSettings.TRANSLATE_LEFT.GetKey()) Enqueue(CommandType.TRANSLATE_LEFT);
+            if (GameSettings.TRANSLATE_RIGHT.GetKey()) Enqueue(CommandType.TRANSLATE_RIGHT);
+            if (GameSettings.THROTTLE_CUTOFF.GetKey()) Enqueue(CommandType.THROTTLE_CUTOFF);
+            if (GameSettings.THROTTLE_FULL.GetKey()) Enqueue(CommandType.THROTTLE_FULL);
+            if (GameSettings.THROTTLE_DOWN.GetKey()) Enqueue(CommandType.THROTTLE_DOWN);
+            if (GameSettings.THROTTLE_UP.GetKey()) Enqueue(CommandType.THROTTLE_UP);
+            if (GameSettings.HEADLIGHT_TOGGLE.GetKeyDown()) Enqueue(CommandType.LIGHT_TOGGLE);
+            if (GameSettings.LANDING_GEAR.GetKeyDown()) Enqueue(CommandType.LANDING_GEAR);
+            if (GameSettings.BRAKES.GetKeyDown()) Enqueue(CommandType.BRAKES);
+            if (GameSettings.RCS_TOGGLE.GetKeyDown()) Enqueue(CommandType.RCS_TOGGLE);
+            if (GameSettings.SAS_TOGGLE.GetKeyDown()) Enqueue(CommandType.SAS_TOGGLE);
+            if (GameSettings.SAS_HOLD.GetKey()) Enqueue(CommandType.SAS_HOLD);
+            if (GameSettings.AbortActionGroup.GetKeyDown()) Enqueue(CommandType.ABORT);
+            if (GameSettings.CustomActionGroup1.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP1);
+            if (GameSettings.CustomActionGroup2.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP2);
+            if (GameSettings.CustomActionGroup3.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP3);
+            if (GameSettings.CustomActionGroup4.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP4);
+            if (GameSettings.CustomActionGroup5.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP5);
+            if (GameSettings.CustomActionGroup6.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP6);
+            if (GameSettings.CustomActionGroup7.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP7);
+            if (GameSettings.CustomActionGroup8.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP8);
+            if (GameSettings.CustomActionGroup9.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP9);
+            if (GameSettings.CustomActionGroup10.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP10);
+        }
+
+        ScreenMessage delayMsg = new ScreenMessage("", 5, ScreenMessageStyle.UPPER_LEFT);
+        public void FixedUpdate()
+        {
+            CheckVessel();
+            delayRecalculated = false;
+            FCSChange.pitch = FCSChange.yaw = FCSChange.roll = 0;
+            double time = Planetarium.GetUniversalTime();
+            while (time >= Queue.NextCommandTime)
+                Queue.Dequeue();
+            if (!Active) return;
+            if (SignalDelaySettings.ShowDelay)
             {
-                foreach (VesselModule vm in Vessel.vesselModules)
-                    if (vm is SignalDelayModule) return ((SignalDelayModule)vm).Queue;
-                return null;
-            }
-            set
-            {
-                foreach (VesselModule vm in Vessel.vesselModules)
-                    if (vm is SignalDelayModule) ((SignalDelayModule)vm).Queue = value;
+                delayMsg.message = "Delay: " + Delay.ToString("F2") + " sec";
+                ScreenMessages.PostScreenMessage(delayMsg);
             }
         }
+
+        // MOD CONTROL METHODS
 
         bool active;
         bool Active
@@ -64,10 +102,69 @@ namespace SignalDelay
         }
 
         public void CheckVessel()
+        { Active = SignalDelaySettings.IsEnabled && Vessel.Connection.IsConnected && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe; }
+
+        // COMMAND QUEUE CONTROL METHODS
+
+        public CommandQueue Queue
         {
-            //Core.Log("Vessel is " + (Vessel.Connection.IsConnected ? "" : "not ") + "connected, control state is " + Vessel.Connection.ControlState + " (" + (int)Vessel.Connection.ControlState + ").");
-            Active = SignalDelaySettings.IsEnabled && Vessel.Connection.IsConnected && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe;
+            get
+            {
+                foreach (VesselModule vm in Vessel.vesselModules)
+                    if (vm is SignalDelayModule) return ((SignalDelayModule)vm).Queue;
+                return null;
+            }
+            set
+            {
+                foreach (VesselModule vm in Vessel.vesselModules)
+                    if (vm is SignalDelayModule) ((SignalDelayModule)vm).Queue = value;
+            }
         }
+
+        void Enqueue(CommandType commandType)
+        {
+            double time = Planetarium.GetUniversalTime();
+            Core.Log("Adding command " + commandType + " at " + time + ".");
+            if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + commandType.ToString());
+            Queue.Enqueue(new Command(commandType, time + Delay));
+        }
+
+        // VESSEL CONTROL METHODS
+
+        Vessel Vessel { get { return FlightGlobals.ActiveVessel; } }
+
+        bool delayRecalculated = false;
+        double delay;
+        public double Delay
+        {
+            get
+            {
+                if (!delayRecalculated) CalculateDelay();
+                return delay;
+            }
+            set
+            {
+                delay = value;
+                delayRecalculated = true;
+            }
+        }
+        
+        void CalculateDelay()
+        {
+            if (Vessel?.Connection?.ControlPath == null)
+            {
+                Core.Log("Cannot access control path for " + Vessel?.vesselName + ", delay set to 0.", Core.LogLevel.Error);
+                Delay = 0;
+                return;
+            }
+            double dist = 0;
+            foreach (CommLink l in Vessel.Connection.ControlPath)
+                dist += Vector3d.Distance(l.a.position, l.b.position);
+            Core.Log("Total distance to Control Source: " + dist.ToString("N0") + " m. Delay = " + (dist / Core.LightSpeed).ToString("F2") + " sec.");
+            Delay = dist / Core.LightSpeed;
+        }
+
+        public static FlightCtrlState FCSChange { get; set; }
 
         public void OnFlyByWire(FlightCtrlState fcs)
         {
@@ -80,79 +177,7 @@ namespace SignalDelay
             }
         }
 
-        public void Update()
-        {
-            if (!Active) return;
-            if (GameSettings.LAUNCH_STAGES.GetKeyDown()) Queue.Enqueue(CommandType.LAUNCH_STAGES);
-            if (GameSettings.PITCH_DOWN.GetKey()) Queue.Enqueue(CommandType.PITCH_DOWN);
-            if (GameSettings.PITCH_UP.GetKey()) Queue.Enqueue(CommandType.PITCH_UP);
-            if (GameSettings.YAW_LEFT.GetKey()) Queue.Enqueue(CommandType.YAW_LEFT);
-            if (GameSettings.YAW_RIGHT.GetKey()) Queue.Enqueue(CommandType.YAW_RIGHT);
-            if (GameSettings.ROLL_LEFT.GetKey()) Queue.Enqueue(CommandType.ROLL_LEFT);
-            if (GameSettings.ROLL_RIGHT.GetKey()) Queue.Enqueue(CommandType.ROLL_RIGHT);
-            if (GameSettings.TRANSLATE_FWD.GetKey()) Queue.Enqueue(CommandType.TRANSLATE_FWD);
-            if (GameSettings.TRANSLATE_BACK.GetKey()) Queue.Enqueue(CommandType.TRANSLATE_BACK);
-            if (GameSettings.TRANSLATE_DOWN.GetKey()) Queue.Enqueue(CommandType.TRANSLATE_DOWN);
-            if (GameSettings.TRANSLATE_UP.GetKey()) Queue.Enqueue(CommandType.TRANSLATE_UP);
-            if (GameSettings.TRANSLATE_LEFT.GetKey()) Queue.Enqueue(CommandType.TRANSLATE_LEFT);
-            if (GameSettings.TRANSLATE_RIGHT.GetKey()) Queue.Enqueue(CommandType.TRANSLATE_RIGHT);
-            if (GameSettings.THROTTLE_CUTOFF.GetKey()) Queue.Enqueue(CommandType.THROTTLE_CUTOFF);
-            if (GameSettings.THROTTLE_FULL.GetKey()) Queue.Enqueue(CommandType.THROTTLE_FULL);
-            if (GameSettings.THROTTLE_DOWN.GetKey()) Queue.Enqueue(CommandType.THROTTLE_DOWN);
-            if (GameSettings.THROTTLE_UP.GetKey()) Queue.Enqueue(CommandType.THROTTLE_UP);
-            if (GameSettings.HEADLIGHT_TOGGLE.GetKeyDown()) Queue.Enqueue(CommandType.LIGHT_TOGGLE);
-            if (GameSettings.LANDING_GEAR.GetKeyDown()) Queue.Enqueue(CommandType.LANDING_GEAR);
-            if (GameSettings.BRAKES.GetKeyDown()) Queue.Enqueue(CommandType.BRAKES);
-            if (GameSettings.RCS_TOGGLE.GetKeyDown()) Queue.Enqueue(CommandType.RCS_TOGGLE);
-            if (GameSettings.SAS_TOGGLE.GetKeyDown()) Queue.Enqueue(CommandType.SAS_TOGGLE);
-            if (GameSettings.SAS_HOLD.GetKey()) Queue.Enqueue(CommandType.SAS_HOLD);
-            if (GameSettings.AbortActionGroup.GetKeyDown()) Queue.Enqueue(CommandType.ABORT);
-            if (GameSettings.CustomActionGroup1.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP1);
-            if (GameSettings.CustomActionGroup2.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP2);
-            if (GameSettings.CustomActionGroup3.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP3);
-            if (GameSettings.CustomActionGroup4.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP4);
-            if (GameSettings.CustomActionGroup5.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP5);
-            if (GameSettings.CustomActionGroup6.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP6);
-            if (GameSettings.CustomActionGroup7.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP7);
-            if (GameSettings.CustomActionGroup8.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP8);
-            if (GameSettings.CustomActionGroup9.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP9);
-            if (GameSettings.CustomActionGroup10.GetKeyDown()) Queue.Enqueue(CommandType.ACTIONGROUP10);
-        }
-
-        double GetDelay()
-        {
-            //Core.Log("CommNet path");
-            if (Vessel?.Connection?.ControlPath == null)
-            {
-                Core.Log("Cannot access control path for " + Vessel?.vesselName + ", delay set to 0.", Core.LogLevel.Error);
-                return 0;
-            }
-            int i = 1;
-            double dist = 0;
-            foreach (CommLink l in Vessel.Connection.ControlPath)
-            {
-                dist += Vector3d.Distance(l.a.position, l.b.position);
-                //Core.Log("Link #" + i++ + ": " + l.a.name + " -> " + l.b.name + " (" + d.ToString("N0") + " m)");
-                //dist += d;
-            }
-            //Core.Log("Total distance to Control Source: " + dist.ToString("N0") + " m. Delay = " + (dist / Core.LightSpeed).ToString("F2") + " sec.");
-            return dist / Core.LightSpeed;
-        }
-
-        ScreenMessage delayMsg = new ScreenMessage("", 5, ScreenMessageStyle.UPPER_LEFT);
-        public void FixedUpdate()
-        {
-            CheckVessel();
-            FCSChange.pitch = FCSChange.yaw = FCSChange.roll = 0;
-            while (Planetarium.GetUniversalTime() >= Queue.NextCommandTime)
-                Queue.Dequeue();
-            if (!Active) return;
-            Queue.Delay = GetDelay();
-            if (SignalDelaySettings.ShowDelay)
-            {
-                delayMsg.message = "Delay: " + Queue.Delay.ToString("F2") + " sec";
-                ScreenMessages.PostScreenMessage(delayMsg);
-            }
-        }
+        //public static bool SASLock { get; set; }
+        //public static bool SASHold { get; set; } = false;
     }
 }

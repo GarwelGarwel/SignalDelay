@@ -7,12 +7,12 @@ namespace SignalDelay
 {
     public class CommandQueue : Queue<Command>
     {
-        public void Enqueue(CommandType command)
-        {
-            Core.Log("Adding command " + command + " at " + Planetarium.GetUniversalTime() + ".");
-            if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + command.ToString());
-            base.Enqueue(new Command(command, Planetarium.GetUniversalTime() + Delay));
-        }
+        //public void Enqueue(CommandType command)
+        //{
+        //    Core.Log("Adding command " + command + " at " + Planetarium.GetUniversalTime() + ".");
+        //    if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + command.ToString());
+        //    base.Enqueue(new Command(command, Planetarium.GetUniversalTime() + Delay));
+        //}
 
         public new Command Dequeue()
         {
@@ -23,7 +23,7 @@ namespace SignalDelay
             return res;
         }
 
-        public double Delay { get; set; }
+        //public double Delay { get; set; }
 
         public double NextCommandTime
         {
