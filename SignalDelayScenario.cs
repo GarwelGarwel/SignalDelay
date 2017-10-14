@@ -40,6 +40,10 @@ namespace SignalDelay
             if (GameSettings.THROTTLE_FULL.GetKey()) Enqueue(CommandType.THROTTLE_FULL);
             if (GameSettings.THROTTLE_DOWN.GetKey()) Enqueue(CommandType.THROTTLE_DOWN);
             if (GameSettings.THROTTLE_UP.GetKey()) Enqueue(CommandType.THROTTLE_UP);
+            if (GameSettings.WHEEL_STEER_LEFT.GetKey()) Enqueue(CommandType.WHEEL_STEER_LEFT);
+            if (GameSettings.WHEEL_STEER_RIGHT.GetKey()) Enqueue(CommandType.WHEEL_STEER_RIGHT);
+            if (GameSettings.WHEEL_THROTTLE_DOWN.GetKey()) Enqueue(CommandType.WHEEL_THROTTLE_DOWN);
+            if (GameSettings.WHEEL_THROTTLE_UP.GetKey()) Enqueue(CommandType.WHEEL_THROTTLE_UP);
             if (GameSettings.HEADLIGHT_TOGGLE.GetKeyDown()) Enqueue(CommandType.LIGHT_TOGGLE);
             if (GameSettings.LANDING_GEAR.GetKeyDown()) Enqueue(CommandType.LANDING_GEAR);
             if (GameSettings.BRAKES.GetKeyDown()) Enqueue(CommandType.BRAKES);
@@ -64,7 +68,7 @@ namespace SignalDelay
         {
             CheckVessel();
             delayRecalculated = false;
-            FCSChange.pitch = FCSChange.yaw = FCSChange.roll = 0;
+            FCSChange.pitch = FCSChange.yaw = FCSChange.roll = FCSChange.wheelSteer = 0;
             double time = Planetarium.GetUniversalTime();
             while (time >= Queue.NextCommandTime)
                 Queue.Dequeue();
@@ -173,7 +177,9 @@ namespace SignalDelay
                 fcs.pitch += FCSChange.pitch;
                 fcs.yaw += FCSChange.yaw;
                 fcs.roll += FCSChange.roll;
+                fcs.wheelSteer += FCSChange.wheelSteer;
                 fcs.mainThrottle = FCSChange.mainThrottle;
+                fcs.wheelThrottle = FCSChange.wheelThrottle;
             }
         }
 

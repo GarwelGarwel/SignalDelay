@@ -99,6 +99,18 @@ namespace SignalDelay
                 case CommandType.THROTTLE_UP:
                     SignalDelayScenario.FCSChange.mainThrottle += 0.01f;
                     break;
+                case CommandType.WHEEL_STEER_LEFT:
+                    SignalDelayScenario.FCSChange.wheelSteer = -1;
+                    break;
+                case CommandType.WHEEL_STEER_RIGHT:
+                    SignalDelayScenario.FCSChange.wheelSteer = 1;
+                    break;
+                case CommandType.WHEEL_THROTTLE_DOWN:
+                    SignalDelayScenario.FCSChange.wheelThrottle -= 0.01f;
+                    break;
+                case CommandType.WHEEL_THROTTLE_UP:
+                    SignalDelayScenario.FCSChange.wheelThrottle += 0.01f;
+                    break;
                 case CommandType.LIGHT_TOGGLE:
                     v.ActionGroups.ToggleGroup(KSPActionGroup.Light);
                     break;
