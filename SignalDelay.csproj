@@ -85,6 +85,7 @@
     <None Include=".vs\VSWorkspaceState.json" />
     <None Include="Patch.cfg" />
     <None Include="README.md" />
+    <None Include="SignalDelay.version" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include=".git\objects\info\" />
