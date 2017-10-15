@@ -33,7 +33,6 @@ namespace SignalDelay
         BRAKES,
         RCS_TOGGLE,
         SAS_TOGGLE,
-        SAS_HOLD,
         SAS_CHANGE_MODE,
         ABORT,
         ACTIONGROUP1,
@@ -126,7 +125,6 @@ namespace SignalDelay
                     v.ActionGroups.ToggleGroup(KSPActionGroup.RCS);
                     break;
                 case CommandType.SAS_TOGGLE:
-                    Core.Log("Autopilot is " + (v.Autopilot.Enabled ? "enabled" : "disabled") + " in " + v.Autopilot.Mode + " mode.");
                     v.ActionGroups.ToggleGroup(KSPActionGroup.SAS);
                     break;
                 case CommandType.SAS_CHANGE_MODE:

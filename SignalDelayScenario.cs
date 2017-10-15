@@ -49,7 +49,8 @@ namespace SignalDelay
             if (GameSettings.BRAKES.GetKeyDown()) Enqueue(CommandType.BRAKES);
             if (GameSettings.RCS_TOGGLE.GetKeyDown()) Enqueue(CommandType.RCS_TOGGLE);
             if (GameSettings.SAS_TOGGLE.GetKeyDown()) Enqueue(CommandType.SAS_TOGGLE);
-            if (GameSettings.SAS_HOLD.GetKey()) Enqueue(CommandType.SAS_HOLD);
+            if (GameSettings.SAS_HOLD.GetKeyDown()) Enqueue(CommandType.SAS_TOGGLE);
+            if (GameSettings.SAS_HOLD.GetKeyUp()) Enqueue(CommandType.SAS_TOGGLE);
             if (GameSettings.AbortActionGroup.GetKeyDown()) Enqueue(CommandType.ABORT);
             if (GameSettings.CustomActionGroup1.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP1);
             if (GameSettings.CustomActionGroup2.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP2);
@@ -191,8 +192,5 @@ namespace SignalDelay
         }
 
         VesselAutopilot.AutopilotMode sasMode;
-
-        //public static bool SASLock { get; set; }
-        //public static bool SASHold { get; set; } = false;
     }
 }
