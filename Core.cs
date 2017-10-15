@@ -8,6 +8,36 @@ namespace SignalDelay
         public static double LightSpeed
         { get { return SignalDelaySettings.LightSpeed / (SignalDelaySettings.RoundTrip ? 2 : 1); } }
 
+        public static string FormatTime(double time, int digits = 2)
+        {
+            double t = time;
+            int d, m, h;
+            string res = "";
+            bool show0 = false;
+            if (t >= KSPUtil.dateTimeFormatter.Day)
+            {
+                d = (int)Math.Floor(time / KSPUtil.dateTimeFormatter.Day);
+                t -= d * KSPUtil.dateTimeFormatter.Day;
+                res += d + " d ";
+                show0 = true;
+            }
+            if ((t >= 3600) || show0)
+            {
+                h = (int)Math.Floor(time / 3600);
+                t -= h * 3600;
+                res += h + " h ";
+                show0 = true;
+            }
+            if ((t >= 60) || show0)
+            {
+                m = (int)Math.Floor(time / 60);
+                t -= m * 60;
+                res += m + " m ";
+            }
+            res += t.ToString("F" + digits) + " s";
+            return res;
+        }
+
         public static double GetDouble(ConfigNode n, string key, double defaultValue = 0)
         {
             double res;
