@@ -34,6 +34,7 @@ namespace SignalDelay
         RCS_TOGGLE,
         SAS_TOGGLE,
         SAS_HOLD,
+        SAS_CHANGE_MODE,
         ABORT,
         ACTIONGROUP1,
         ACTIONGROUP2,
@@ -51,6 +52,7 @@ namespace SignalDelay
     {
         public CommandType Type { get; set; }
         public double Time { get; set; }
+        public List<object> Params { get; set; } = new List<object>();
 
         public void Execute()
         {
@@ -125,12 +127,11 @@ namespace SignalDelay
                     break;
                 case CommandType.SAS_TOGGLE:
                     Core.Log("Autopilot is " + (v.Autopilot.Enabled ? "enabled" : "disabled") + " in " + v.Autopilot.Mode + " mode.");
-                    //SignalDelayScenario.SASLock = !SignalDelayScenario.SASLock;
                     v.ActionGroups.ToggleGroup(KSPActionGroup.SAS);
                     break;
-                case CommandType.SAS_HOLD:
-                    Core.Log("Autopilot is " + (v.Autopilot.Enabled ? "enabled" : "disabled") + " in " + v.Autopilot.Mode + " mode.");
-                    //SignalDelayScenario.SASHold = true;
+                case CommandType.SAS_CHANGE_MODE:
+                    if ((Params.Count > 0) && (Params[0] is VesselAutopilot.AutopilotMode) && v.Autopilot.CanSetMode((VesselAutopilot.AutopilotMode)Params[0]))
+                        v.Autopilot.SetMode((VesselAutopilot.AutopilotMode)Params[0]);
                     break;
                 case CommandType.ABORT:
                     v.ActionGroups.ToggleGroup(KSPActionGroup.Abort);
@@ -188,8 +189,7 @@ namespace SignalDelay
             }
         }
 
-        public override string ToString()
-        { return Type + " @ " + Time; }
+        public override string ToString() => Type + " @ " + Time;
 
         public Command(CommandType type, double time)
         {

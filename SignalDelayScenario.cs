@@ -61,6 +61,11 @@ namespace SignalDelay
             if (GameSettings.CustomActionGroup8.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP8);
             if (GameSettings.CustomActionGroup9.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP9);
             if (GameSettings.CustomActionGroup10.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP10);
+            if (Vessel.Autopilot.Mode != sasMode)
+            {
+                Enqueue(CommandType.SAS_CHANGE_MODE, Vessel.Autopilot.Mode);
+                Vessel.Autopilot.SetMode(sasMode);
+            }
         }
 
         ScreenMessage delayMsg = new ScreenMessage("", 5, ScreenMessageStyle.UPPER_LEFT);
@@ -70,12 +75,12 @@ namespace SignalDelay
             delayRecalculated = false;
             FCSChange.pitch = FCSChange.yaw = FCSChange.roll = FCSChange.wheelSteer = 0;
             double time = Planetarium.GetUniversalTime();
-            while (time >= Queue.NextCommandTime)
-                Queue.Dequeue();
+            while (time >= Queue.NextCommandTime) Queue.Dequeue();
+            sasMode = Vessel.Autopilot.Mode;
             if (!Active) return;
             if (SignalDelaySettings.ShowDelay)
             {
-                delayMsg.message = "Delay: " + Delay.ToString("F2") + " sec";
+                delayMsg.message = "Delay: " + Core.FormatTime(Delay);
                 ScreenMessages.PostScreenMessage(delayMsg);
             }
         }
@@ -94,6 +99,7 @@ namespace SignalDelay
                 if (active)
                 {
                     FCSChange = new FlightCtrlState();
+                    sasMode = Vessel.Autopilot.Mode;
                     InputLockManager.SetControlLock(SignalDelaySettings.HidePartActions ? ControlTypes.ALL_SHIP_CONTROLS : ControlTypes.ALL_SHIP_CONTROLS ^ ControlTypes.ACTIONS_SHIP, "this");
                     if (SignalDelaySettings.DebugMode) Core.ShowNotification("Delay activated.");
                 }
@@ -108,7 +114,7 @@ namespace SignalDelay
         public void CheckVessel()
         { Active = SignalDelaySettings.IsEnabled && Vessel.Connection.IsConnected && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe; }
 
-        // COMMAND QUEUE CONTROL METHODS
+        // COMMAND QUEUE METHODS
 
         public CommandQueue Queue
         {
@@ -125,15 +131,17 @@ namespace SignalDelay
             }
         }
 
-        void Enqueue(CommandType commandType)
+        void Enqueue(CommandType commandType, params object[] par)
         {
             double time = Planetarium.GetUniversalTime();
             Core.Log("Adding command " + commandType + " at " + time + ".");
             if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + commandType.ToString());
-            Queue.Enqueue(new Command(commandType, time + Delay));
+            Command c = new Command(commandType, time + Delay);
+            foreach (object p in par) c.Params.Add(p);
+            Queue.Enqueue(c);
         }
 
-        // VESSEL CONTROL METHODS
+        // VESSEL METHODS
 
         Vessel Vessel { get { return FlightGlobals.ActiveVessel; } }
 
@@ -164,12 +172,11 @@ namespace SignalDelay
             double dist = 0;
             foreach (CommLink l in Vessel.Connection.ControlPath)
                 dist += Vector3d.Distance(l.a.position, l.b.position);
-            Core.Log("Total distance to Control Source: " + dist.ToString("N0") + " m. Delay = " + (dist / Core.LightSpeed).ToString("F2") + " sec.");
+            //Core.Log("Total distance to Control Source: " + dist.ToString("N0") + " m. Delay = " + (dist / Core.LightSpeed).ToString("F2") + " sec.");
             Delay = dist / Core.LightSpeed;
         }
 
         public static FlightCtrlState FCSChange { get; set; }
-
         public void OnFlyByWire(FlightCtrlState fcs)
         {
             if (Active)
@@ -182,6 +189,8 @@ namespace SignalDelay
                 fcs.wheelThrottle = FCSChange.wheelThrottle;
             }
         }
+
+        VesselAutopilot.AutopilotMode sasMode;
 
         //public static bool SASLock { get; set; }
         //public static bool SASHold { get; set; } = false;
