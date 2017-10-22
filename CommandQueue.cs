@@ -11,6 +11,7 @@ namespace SignalDelay
         {
             Command res = base.Dequeue();
             Core.Log("Executing command " + res + ".");
+            if (TimeWarp.CurrentRate > TimeWarp.MaxPhysicsRate) TimeWarp.SetRate(0, true);
             if (SignalDelaySettings.DebugMode) Core.ShowNotification("Execute: " + res.Type);
             res.Execute();
             return res;
