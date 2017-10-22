@@ -62,55 +62,55 @@ namespace SignalDelay
                     KSP.UI.Screens.StageManager.ActivateNextStage();
                     break;
                 case CommandType.PITCH_DOWN:
-                    SignalDelayScenario.FCSChange.pitch = -1;
+                    SignalDelayScenario.FlightCtrlState.pitch = -1;
                     break;
                 case CommandType.PITCH_UP:
-                    SignalDelayScenario.FCSChange.pitch = 1;
+                    SignalDelayScenario.FlightCtrlState.pitch = 1;
                     break;
                 case CommandType.YAW_LEFT:
-                    SignalDelayScenario.FCSChange.yaw = -1;
+                    SignalDelayScenario.FlightCtrlState.yaw = -1;
                     break;
                 case CommandType.YAW_RIGHT:
-                    SignalDelayScenario.FCSChange.yaw = 1;
+                    SignalDelayScenario.FlightCtrlState.yaw = 1;
                     break;
                 case CommandType.ROLL_LEFT:
-                    SignalDelayScenario.FCSChange.roll = -1;
+                    SignalDelayScenario.FlightCtrlState.roll = -1;
                     break;
                 case CommandType.ROLL_RIGHT:
-                    SignalDelayScenario.FCSChange.roll = 1;
+                    SignalDelayScenario.FlightCtrlState.roll = 1;
                     break;
-                case CommandType.TRANSLATE_FWD:
-                    v.Translate(new Vector3d(1, 0, 0));
-                    break;
-                case CommandType.TRANSLATE_UP:
-                    v.Translate(new Vector3d(0, 1, 0));
-                    break;
-                case CommandType.TRANSLATE_RIGHT:
-                    v.Translate(new Vector3d(0, 0, 1));
-                    break;
+                //case CommandType.TRANSLATE_FWD:
+                //    v.Translate(new Vector3d(1, 0, 0));
+                //    break;
+                //case CommandType.TRANSLATE_UP:
+                //    v.Translate(new Vector3d(0, 1, 0));
+                //    break;
+                //case CommandType.TRANSLATE_RIGHT:
+                //    v.Translate(new Vector3d(0, 0, 1));
+                //    break;
                 case CommandType.THROTTLE_CUTOFF:
-                    SignalDelayScenario.FCSChange.mainThrottle = 0;
+                    SignalDelayScenario.FlightCtrlState.mainThrottle = 0;
                     break;
                 case CommandType.THROTTLE_FULL:
-                    SignalDelayScenario.FCSChange.mainThrottle = 1;
+                    SignalDelayScenario.FlightCtrlState.mainThrottle = 1;
                     break;
                 case CommandType.THROTTLE_DOWN:
-                    SignalDelayScenario.FCSChange.mainThrottle -= 0.01f;
+                    SignalDelayScenario.FlightCtrlState.mainThrottle -= 0.01f;
                     break;
                 case CommandType.THROTTLE_UP:
-                    SignalDelayScenario.FCSChange.mainThrottle += 0.01f;
+                    SignalDelayScenario.FlightCtrlState.mainThrottle += 0.01f;
                     break;
                 case CommandType.WHEEL_STEER_LEFT:
-                    SignalDelayScenario.FCSChange.wheelSteer = -1;
+                    SignalDelayScenario.FlightCtrlState.wheelSteer = 0;
                     break;
                 case CommandType.WHEEL_STEER_RIGHT:
-                    SignalDelayScenario.FCSChange.wheelSteer = 1;
+                    SignalDelayScenario.FlightCtrlState.wheelSteer = 1;
                     break;
                 case CommandType.WHEEL_THROTTLE_DOWN:
-                    SignalDelayScenario.FCSChange.wheelThrottle -= 0.01f;
+                    SignalDelayScenario.FlightCtrlState.wheelThrottle -= 0.01f;
                     break;
                 case CommandType.WHEEL_THROTTLE_UP:
-                    SignalDelayScenario.FCSChange.wheelThrottle += 0.01f;
+                    SignalDelayScenario.FlightCtrlState.wheelThrottle += 0.01f;
                     break;
                 case CommandType.LIGHT_TOGGLE:
                     v.ActionGroups.ToggleGroup(KSPActionGroup.Light);

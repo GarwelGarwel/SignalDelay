@@ -46,6 +46,20 @@ namespace SignalDelay
             return res;
         }
 
+        public static string FCSToString(FlightCtrlState flightCtrlState, string title = "")
+        {
+            string res = "";
+            if (flightCtrlState.pitch != 0) res += "Pitch: " + flightCtrlState.pitch + "   ";
+            if (flightCtrlState.pitchTrim != 0) res += "Pitch Trim: " + flightCtrlState.pitchTrim + "   ";
+            if (flightCtrlState.yaw != 0) res += "Yaw: " + flightCtrlState.yaw + "   ";
+            if (flightCtrlState.yawTrim != 0) res += "Yaw Trim: " + flightCtrlState.yawTrim + "   ";
+            if (flightCtrlState.roll != 0) res += "Roll: " + flightCtrlState.roll + "   ";
+            if (flightCtrlState.rollTrim != 0) res += "Roll Trim: " + flightCtrlState.rollTrim + "   ";
+            if (flightCtrlState.mainThrottle != 0) res += "Throttle: " + flightCtrlState.mainThrottle;
+            return (((title != "") && (res != "")) ? title + ": " : "") + res;
+            return res;
+        }
+
         public static void ShowNotification(string msg)
         { ScreenMessages.PostScreenMessage(msg); }
 

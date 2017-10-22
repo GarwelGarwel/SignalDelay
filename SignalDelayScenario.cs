@@ -1,21 +1,21 @@
-﻿using CommNet;
+﻿using System;
+using CommNet;
 
 namespace SignalDelay
 {
     [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.FLIGHT)]
     public class SignalDelayScenario : ScenarioModule
     {
-        // LIFE CYCLE METHODS
+        #region LIFE CYCLE METHODS
 
         public void Start()
         {
             Core.Log("Start");
             Vessel.OnFlyByWire += OnFlyByWire;
-            //SASLock = Vessel.Autopilot.Enabled;
         }
 
         public void OnDisable()
-        { 
+        {
             Core.Log("OnDisable");
             Active = false;
         }
@@ -23,6 +23,11 @@ namespace SignalDelay
         public void Update()
         {
             if (!Active) return;
+
+            // Checking if kOS terminal is focused and locks control
+            if (InputLockManager.lockStack.ContainsKey("kOSTerminal")) return;
+
+            // Checking all key presses and enqueing corresponding actions
             if (GameSettings.LAUNCH_STAGES.GetKeyDown()) Enqueue(CommandType.LAUNCH_STAGES);
             if (GameSettings.PITCH_DOWN.GetKey()) Enqueue(CommandType.PITCH_DOWN);
             if (GameSettings.PITCH_UP.GetKey()) Enqueue(CommandType.PITCH_UP);
@@ -36,8 +41,8 @@ namespace SignalDelay
             if (GameSettings.TRANSLATE_UP.GetKey()) Enqueue(CommandType.TRANSLATE_UP);
             if (GameSettings.TRANSLATE_LEFT.GetKey()) Enqueue(CommandType.TRANSLATE_LEFT);
             if (GameSettings.TRANSLATE_RIGHT.GetKey()) Enqueue(CommandType.TRANSLATE_RIGHT);
-            if (GameSettings.THROTTLE_CUTOFF.GetKey()) Enqueue(CommandType.THROTTLE_CUTOFF);
-            if (GameSettings.THROTTLE_FULL.GetKey()) Enqueue(CommandType.THROTTLE_FULL);
+            if (GameSettings.THROTTLE_CUTOFF.GetKeyDown()) Enqueue(CommandType.THROTTLE_CUTOFF);
+            if (GameSettings.THROTTLE_FULL.GetKeyDown()) Enqueue(CommandType.THROTTLE_FULL);
             if (GameSettings.THROTTLE_DOWN.GetKey()) Enqueue(CommandType.THROTTLE_DOWN);
             if (GameSettings.THROTTLE_UP.GetKey()) Enqueue(CommandType.THROTTLE_UP);
             if (GameSettings.WHEEL_STEER_LEFT.GetKey()) Enqueue(CommandType.WHEEL_STEER_LEFT);
@@ -62,6 +67,8 @@ namespace SignalDelay
             if (GameSettings.CustomActionGroup8.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP8);
             if (GameSettings.CustomActionGroup9.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP9);
             if (GameSettings.CustomActionGroup10.GetKeyDown()) Enqueue(CommandType.ACTIONGROUP10);
+
+            // If the user has changed SAS mode, enqueue this command and reset mode
             if (Vessel.Autopilot.Mode != sasMode)
             {
                 Enqueue(CommandType.SAS_CHANGE_MODE, Vessel.Autopilot.Mode);
@@ -74,7 +81,7 @@ namespace SignalDelay
         {
             CheckVessel();
             delayRecalculated = false;
-            FCSChange.pitch = FCSChange.yaw = FCSChange.roll = FCSChange.wheelSteer = 0;
+            FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = FlightCtrlState.wheelSteer = 0;
             double time = Planetarium.GetUniversalTime();
             while (time >= Queue.NextCommandTime) Queue.Dequeue();
             sasMode = Vessel.Autopilot.Mode;
@@ -86,7 +93,8 @@ namespace SignalDelay
             }
         }
 
-        // MOD CONTROL METHODS
+        #endregion
+        #region MOD CONTROL METHODS
 
         bool active;
         bool Active
@@ -99,23 +107,34 @@ namespace SignalDelay
                 active = value;
                 if (active)
                 {
-                    FCSChange = new FlightCtrlState();
+                    FlightCtrlState = new FlightCtrlState()
+                    { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
+                    Core.Log("Cached throttle = " + throttleCache);
                     sasMode = Vessel.Autopilot.Mode;
                     InputLockManager.SetControlLock(SignalDelaySettings.HidePartActions ? ControlTypes.ALL_SHIP_CONTROLS : ControlTypes.ALL_SHIP_CONTROLS ^ ControlTypes.ACTIONS_SHIP, "this");
-                    if (SignalDelaySettings.DebugMode) Core.ShowNotification("Delay activated.");
+                    if (SignalDelaySettings.DebugMode) Core.ShowNotification("Signal delay activated.");
                 }
                 else
                 {
                     InputLockManager.RemoveControlLock("this");
-                    if (SignalDelaySettings.DebugMode) Core.ShowNotification("Delay deactivated.");
+                    if (SignalDelaySettings.DebugMode) Core.ShowNotification("Signal delay deactivated.");
                 }
+            }
+        }
+
+        bool HasKOS
+        {
+            get
+            {
+                return false;
             }
         }
 
         public void CheckVessel()
         { Active = SignalDelaySettings.IsEnabled && Vessel.Connection.IsConnected && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe; }
 
-        // COMMAND QUEUE METHODS
+        #endregion
+        #region COMMAND QUEUE METHODS
 
         public CommandQueue Queue
         {
@@ -142,7 +161,8 @@ namespace SignalDelay
             Queue.Enqueue(c);
         }
 
-        // VESSEL METHODS
+        #endregion
+        #region VESSEL METHODS
 
         Vessel Vessel { get { return FlightGlobals.ActiveVessel; } }
 
@@ -161,7 +181,7 @@ namespace SignalDelay
                 delayRecalculated = true;
             }
         }
-        
+
         void CalculateDelay()
         {
             if (Vessel?.Connection?.ControlPath == null)
@@ -173,24 +193,30 @@ namespace SignalDelay
             double dist = 0;
             foreach (CommLink l in Vessel.Connection.ControlPath)
                 dist += Vector3d.Distance(l.a.position, l.b.position);
-            //Core.Log("Total distance to Control Source: " + dist.ToString("N0") + " m. Delay = " + (dist / Core.LightSpeed).ToString("F2") + " sec.");
             Delay = dist / Core.LightSpeed;
         }
 
-        public static FlightCtrlState FCSChange { get; set; }
+        public static FlightCtrlState FlightCtrlState { get; set; } = new FlightCtrlState();
+        float throttleCache;
+        VesselAutopilot.AutopilotMode sasMode;
+
         public void OnFlyByWire(FlightCtrlState fcs)
         {
+            //Core.Log(Core.FCSToString(fcs, "Input"));
+            //Core.Log(Core.FCSToString(FlightCtrlState, "Output"));
             if (Active)
             {
-                fcs.pitch += FCSChange.pitch;
-                fcs.yaw += FCSChange.yaw;
-                fcs.roll += FCSChange.roll;
-                fcs.wheelSteer += FCSChange.wheelSteer;
-                fcs.mainThrottle = FCSChange.mainThrottle;
-                fcs.wheelThrottle = FCSChange.wheelThrottle;
+                fcs.pitch += FlightCtrlState.pitch;
+                fcs.yaw += FlightCtrlState.yaw;
+                fcs.roll += FlightCtrlState.roll;
+                fcs.wheelSteer += FlightCtrlState.wheelSteer;
+                if (fcs.mainThrottle == throttleCache)  // Checking whether throttle has been changed by any other mod such as kOS
+                    fcs.mainThrottle = FlightCtrlState.mainThrottle;
+                else FlightCtrlState.mainThrottle = throttleCache = fcs.mainThrottle;
+                fcs.wheelThrottle = FlightCtrlState.wheelThrottle;
             }
         }
-
-        VesselAutopilot.AutopilotMode sasMode;
+        #endregion
     }
 }
+
