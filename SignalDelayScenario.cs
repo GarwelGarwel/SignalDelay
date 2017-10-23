@@ -71,7 +71,7 @@ namespace SignalDelay
             }
         }
 
-        ScreenMessage delayMsg = new ScreenMessage("", 5, ScreenMessageStyle.UPPER_LEFT);
+        ScreenMessage delayMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_LEFT);
         public void FixedUpdate()
         {
             CheckVessel();
