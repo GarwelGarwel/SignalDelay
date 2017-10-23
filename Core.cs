@@ -5,8 +5,7 @@ namespace SignalDelay
 {
     class Core
     {
-        public static double LightSpeed
-        { get { return SignalDelaySettings.LightSpeed / (SignalDelaySettings.RoundTrip ? 2 : 1); } }
+        public static double LightSpeed => SignalDelaySettings.LightSpeed / (SignalDelaySettings.RoundTrip ? 2 : 1);
 
         public static string FormatTime(double time, int digits = 2)
         {
@@ -57,11 +56,9 @@ namespace SignalDelay
             if (flightCtrlState.rollTrim != 0) res += "Roll Trim: " + flightCtrlState.rollTrim + "   ";
             if (flightCtrlState.mainThrottle != 0) res += "Throttle: " + flightCtrlState.mainThrottle;
             return (((title != "") && (res != "")) ? title + ": " : "") + res;
-            return res;
         }
 
-        public static void ShowNotification(string msg)
-        { ScreenMessages.PostScreenMessage(msg); }
+        public static void ShowNotification(string msg) => ScreenMessages.PostScreenMessage(msg);
 
         /// <summary>
         /// Log levels:
@@ -77,8 +74,7 @@ namespace SignalDelay
         /// <summary>
         /// Current <see cref="LogLevel"/>: either Debug or Important
         /// </summary>
-        public static LogLevel Level
-        { get { return SignalDelaySettings.DebugMode ? LogLevel.Debug : LogLevel.Important; } }
+        public static LogLevel Level => SignalDelaySettings.DebugMode ? LogLevel.Debug : LogLevel.Important;
 
         /// <summary>
         /// Write into output_log.txt

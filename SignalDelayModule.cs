@@ -8,8 +8,6 @@ namespace SignalDelay
     {
         public CommandQueue Queue { get; set; } = new CommandQueue();
 
-        bool IsActiveVessel { get { return Vessel == FlightGlobals.ActiveVessel; } }
-
         protected override void OnSave(ConfigNode node)
         {
             Core.Log("Saving SignalDelayModule for " + Vessel.vesselName + ". Scene is " + HighLogic.LoadedScene + ". Active vessel is " + FlightGlobals.ActiveVessel?.vesselName + ".");

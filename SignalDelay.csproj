@@ -87,7 +87,6 @@
     <None Include=".vs\SignalDelay\v15\.suo" />
     <None Include=".vs\slnx.sqlite" />
     <None Include=".vs\VSWorkspaceState.json" />
-    <None Include="Patch.cfg" />
     <None Include="README.md" />
     <None Include="SignalDelay.version" />
   </ItemGroup>

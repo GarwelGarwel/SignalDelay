@@ -17,14 +17,7 @@ namespace SignalDelay
             return res;
         }
 
-        public double NextCommandTime
-        {
-            get
-            {
-                if (Count == 0) return double.PositiveInfinity;
-                return Peek().Time;
-            }
-        }
+        public double NextCommandTime => (Count != 0) ? Peek().Time : double.PositiveInfinity;
 
         public ConfigNode ConfigNode
         {
@@ -44,8 +37,7 @@ namespace SignalDelay
             }
         }
 
-        public CommandQueue() : base()
-        { }
+        public CommandQueue() : base() { }
 
         public CommandQueue(ConfigNode node) : base(node.CountNodes)
         { ConfigNode = node; }
