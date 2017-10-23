@@ -9,19 +9,14 @@ namespace SignalDelay
         #region LIFE CYCLE METHODS
 
         public void Start()
-        {
-            Core.Log("Start");
-            Vessel.OnFlyByWire += OnFlyByWire;
-        }
+        { Vessel.OnFlyByWire += OnFlyByWire; }
 
         public void OnDisable()
-        {
-            Core.Log("OnDisable");
-            Active = false;
-        }
+        { Active = false; }
 
         public void Update()
         {
+            //if (GameSettings.LANDING_GEAR.GetKeyDown()) SignalDelaySettings.IsEnabled = !SignalDelaySettings.IsEnabled;  // -- COMMENT AFTER TEST!!!
             if (!Active) return;
 
             // Checking if kOS terminal is focused and locks control
@@ -81,7 +76,7 @@ namespace SignalDelay
         {
             CheckVessel();
             delayRecalculated = false;
-            FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = FlightCtrlState.wheelSteer = 0;
+            FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = FlightCtrlState.wheelSteer = FlightCtrlState.wheelThrottle = 0;
             double time = Planetarium.GetUniversalTime();
             while (time >= Queue.NextCommandTime) Queue.Dequeue();
             sasMode = Vessel.Autopilot.Mode;
@@ -99,7 +94,7 @@ namespace SignalDelay
         bool active;
         bool Active
         {
-            get { return active; }
+            get => active;
             set
             {
                 if (value == active) return;
@@ -119,14 +114,6 @@ namespace SignalDelay
                     InputLockManager.RemoveControlLock("this");
                     if (SignalDelaySettings.DebugMode) Core.ShowNotification("Signal delay deactivated.");
                 }
-            }
-        }
-
-        bool HasKOS
-        {
-            get
-            {
-                return false;
             }
         }
 
@@ -164,7 +151,7 @@ namespace SignalDelay
         #endregion
         #region VESSEL METHODS
 
-        Vessel Vessel { get { return FlightGlobals.ActiveVessel; } }
+        Vessel Vessel => FlightGlobals.ActiveVessel;
 
         bool delayRecalculated = false;
         double delay;
@@ -199,13 +186,26 @@ namespace SignalDelay
         public static FlightCtrlState FlightCtrlState { get; set; } = new FlightCtrlState();
         float throttleCache;
         VesselAutopilot.AutopilotMode sasMode;
+        bool sasPaused = false;
 
         public void OnFlyByWire(FlightCtrlState fcs)
         {
-            //Core.Log(Core.FCSToString(fcs, "Input"));
-            //Core.Log(Core.FCSToString(FlightCtrlState, "Output"));
+            Core.Log(Core.FCSToString(fcs, "Input"));
+            Core.Log(Core.FCSToString(FlightCtrlState, "Output"));
             if (Active)
             {
+                if (Vessel.Autopilot.Enabled && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
+                {
+                    Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.");
+                    Vessel.Autopilot.Disable();
+                    sasPaused = true;
+                }
+                else if (sasPaused)
+                {
+                    Core.Log("No user steering. Re-enabling autopilot.");
+                    Vessel.Autopilot.Enable();
+                    sasPaused = false;
+                }
                 fcs.pitch += FlightCtrlState.pitch;
                 fcs.yaw += FlightCtrlState.yaw;
                 fcs.roll += FlightCtrlState.roll;
