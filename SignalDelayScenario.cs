@@ -77,8 +77,7 @@ namespace SignalDelay
             CheckVessel();
             delayRecalculated = false;
             FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = FlightCtrlState.wheelSteer = FlightCtrlState.wheelThrottle = 0;
-            double time = Planetarium.GetUniversalTime();
-            while (time >= Queue.NextCommandTime) Queue.Dequeue();
+            while (Planetarium.GetUniversalTime() >= Queue.NextCommandTime) Queue.Dequeue();
             sasMode = Vessel.Autopilot.Mode;
             if (!Active) return;
             if (SignalDelaySettings.ShowDelay)
@@ -190,19 +189,19 @@ namespace SignalDelay
 
         public void OnFlyByWire(FlightCtrlState fcs)
         {
-            Core.Log(Core.FCSToString(fcs, "Input"));
-            Core.Log(Core.FCSToString(FlightCtrlState, "Output"));
+            //Core.Log(Core.FCSToString(fcs, "Input"));
+            //Core.Log(Core.FCSToString(FlightCtrlState, "Output"));
             if (Active)
             {
                 if (Vessel.Autopilot.Enabled && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
                 {
-                    Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.");
+                    Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.", Core.LogLevel.Important);
                     Vessel.Autopilot.Disable();
                     sasPaused = true;
                 }
                 else if (sasPaused)
                 {
-                    Core.Log("No user steering. Re-enabling autopilot.");
+                    Core.Log("No user steering. Re-enabling autopilot.", Core.LogLevel.Important);
                     Vessel.Autopilot.Enable();
                     sasPaused = false;
                 }
