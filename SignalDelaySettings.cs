@@ -19,7 +19,7 @@ namespace SignalDelay
 
         public override bool HasPresets => false;
 
-        [GameParameters.CustomParameterUI("Mod Enabled", toolTip = "Enable signal delays for probes")]
+        [GameParameters.CustomParameterUI("Delay Enabled", toolTip = "Enable signal delays for probes")]
         public bool enabled = true;
         public static bool IsEnabled
         {
@@ -41,6 +41,14 @@ namespace SignalDelay
         {
             get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().roundtrip;
             set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().roundtrip = value;
+        }
+
+        [GameParameters.CustomParameterUI("EC Usage Enabled", toolTip = "Enable EC usage by antennas for telemetry (independent from delay setting)")]
+        public bool ecUsage = true;
+        public static bool IsECUsageEnabled
+        {
+            get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecUsage;
+            set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecUsage = value;
         }
 
         [GameParameters.CustomFloatParameterUI("Sensitivity", toolTip = "How fast throttle moves with key presses", minValue = 0.5f, maxValue = 2, asPercentage = true, displayFormat = "F2")]
