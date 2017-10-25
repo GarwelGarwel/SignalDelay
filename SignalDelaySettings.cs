@@ -43,14 +43,6 @@ namespace SignalDelay
             set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().roundtrip = value;
         }
 
-        [GameParameters.CustomParameterUI("EC Usage Enabled", toolTip = "Enable EC usage by antennas for telemetry (independent from delay setting)")]
-        public bool ecUsage = true;
-        public static bool IsECUsageEnabled
-        {
-            get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecUsage;
-            set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecUsage = value;
-        }
-
         [GameParameters.CustomFloatParameterUI("Sensitivity", toolTip = "How fast throttle moves with key presses", minValue = 0.5f, maxValue = 2, asPercentage = true, displayFormat = "F2")]
         public float throttleSensitivity = 1;
         public static float ThrottleSensitivity
@@ -73,6 +65,22 @@ namespace SignalDelay
         {
             get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().showDelay;
             set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().showDelay = value;
+        }
+
+        [GameParameters.CustomParameterUI("EC Usage Enabled", toolTip = "Enable EC usage by antennas for telemetry (independent from delay setting)")]
+        public bool ecUsage = true;
+        public static bool IsECUsageEnabled
+        {
+            get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecUsage;
+            set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecUsage = value;
+        }
+
+        [GameParameters.CustomFloatParameterUI("EC Usage @ 100% Signal", toolTip = "How much EC is used when having 100% connection, relative to maximum usage", asPercentage = true, minValue = 0, maxValue = 1, stepCount = 11)]
+        public float ecBonus = 0.5f;
+        public static float ECBonus
+        {
+            get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecBonus;
+            set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecBonus = value;
         }
 
         [GameParameters.CustomParameterUI("Debug Mode", toolTip = "Verbose logging, obligatory for bug submissions")]

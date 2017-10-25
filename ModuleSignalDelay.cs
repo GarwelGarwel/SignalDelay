@@ -27,14 +27,16 @@ namespace SignalDelay
             lastUpdated = Planetarium.GetUniversalTime();
         }
 
+        double ConsumptionRate => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.SignalStrength * (1 - SignalDelaySettings.ECBonus)) : 1);
+
         public void FixedUpdate()
         {
             double time = Planetarium.GetUniversalTime();
             if (time <= lastUpdated) return;
-            if (IsActive) part.RequestResource(resourceId, ecRate * (time - lastUpdated));
+            if (IsActive) part.RequestResource(resourceId, ConsumptionRate * (time - lastUpdated));
             lastUpdated = time;
         }
 
-        public override string GetInfo() => "EC usage: " + ecRate + "/s";
+        public override string GetInfo() => "Telemetry EC Usage: up to " + ecRate + "/s";
     }
 }
