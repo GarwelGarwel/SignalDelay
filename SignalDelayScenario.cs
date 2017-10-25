@@ -141,7 +141,7 @@ namespace SignalDelay
         {
             double time = Planetarium.GetUniversalTime();
             Core.Log("Adding command " + commandType + " at " + time + ".");
-            if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + commandType.ToString());
+            //if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + commandType.ToString());
             Command c = new Command(commandType, time + Delay);
             foreach (object p in par) c.Params.Add(p);
             Queue.Enqueue(c);

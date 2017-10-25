@@ -79,15 +79,6 @@ namespace SignalDelay
                 case CommandType.ROLL_RIGHT:
                     SignalDelayScenario.FlightCtrlState.roll = 1;
                     break;
-                //case CommandType.TRANSLATE_FWD:
-                //    v.Translate(new Vector3d(1, 0, 0));
-                //    break;
-                //case CommandType.TRANSLATE_UP:
-                //    v.Translate(new Vector3d(0, 1, 0));
-                //    break;
-                //case CommandType.TRANSLATE_RIGHT:
-                //    v.Translate(new Vector3d(0, 0, 1));
-                //    break;
                 case CommandType.THROTTLE_CUTOFF:
                     SignalDelayScenario.FlightCtrlState.mainThrottle = 0;
                     break;
