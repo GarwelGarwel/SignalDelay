@@ -100,7 +100,7 @@
     <Compile Include="CommandQueue.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SignalDelayModule.cs" />
+    <Compile Include="SignalDelayVesselModule.cs" />
     <Compile Include="SignalDelayScenario.cs" />
     <Compile Include="SignalDelaySettings.cs" />
   </ItemGroup>

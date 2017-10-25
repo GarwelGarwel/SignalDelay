@@ -127,13 +127,13 @@ namespace SignalDelay
             get
             {
                 foreach (VesselModule vm in Vessel.vesselModules)
-                    if (vm is SignalDelayModule) return ((SignalDelayModule)vm).Queue;
+                    if (vm is SignalDelayVesselModule) return ((SignalDelayVesselModule)vm).Queue;
                 return null;
             }
             set
             {
                 foreach (VesselModule vm in Vessel.vesselModules)
-                    if (vm is SignalDelayModule) ((SignalDelayModule)vm).Queue = value;
+                    if (vm is SignalDelayVesselModule) ((SignalDelayVesselModule)vm).Queue = value;
             }
         }
 

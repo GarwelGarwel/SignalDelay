@@ -4,7 +4,7 @@ using CommNet;
 
 namespace SignalDelay
 {
-    class SignalDelayModule : CommNetVessel
+    class SignalDelayVesselModule : CommNetVessel
     {
         public CommandQueue Queue { get; set; } = new CommandQueue();
 
