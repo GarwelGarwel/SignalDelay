@@ -27,7 +27,7 @@ namespace SignalDelay
             set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().enabled = value;
         }
         
-        [GameParameters.CustomFloatParameterUI("Speed of Light", toolTip = "How fast signal travels, m/s", minValue = 1e8f, maxValue = 1e9f)]
+        [GameParameters.CustomFloatParameterUI("Speed of Light, m/s", toolTip = "How fast signal travels, m/s", minValue = 1e8f, maxValue = 1e9f)]
         public float lightSpeed = 299792458;
         public static float LightSpeed
         {
@@ -75,7 +75,7 @@ namespace SignalDelay
             set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecUsage = value;
         }
 
-        [GameParameters.CustomFloatParameterUI("EC Usage @ 100% Signal", toolTip = "How much EC is used when having 100% connection, relative to maximum usage", asPercentage = true, minValue = 0, maxValue = 1, stepCount = 11)]
+        [GameParameters.CustomFloatParameterUI("EC Usage @ 100% Signal Strength", toolTip = "How much EC is used when having 100% connection, relative to maximum usage", asPercentage = true, displayFormat = "F1", minValue = 0, maxValue = 1, stepCount = 11)]
         public float ecBonus = 0.5f;
         public static float ECBonus
         {
