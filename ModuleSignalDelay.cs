@@ -39,10 +39,9 @@ namespace SignalDelay
             if (IsActive)
             {
                 actualECRate = (float)ConsumptionRate;
-                Fields["actualECRate"].guiActive = actualECRate > 0;
                 part.RequestResource(resourceId, actualECRate * (time - lastUpdated));
             }
-            else Fields["effectiveECRate"].guiActive = false;
+            else actualECRate = 0;
             lastUpdated = time;
         }
 
