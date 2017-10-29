@@ -10,6 +10,9 @@ namespace SignalDelay
         [KSPField]
         public float ecRate = 0;
 
+        [KSPField(guiName = "EC Usage", guiUnits = "/sec", guiActive = true, guiFormat = "F2")]
+        public float actualECRate = 0;
+
         double lastUpdated;
         int resourceId;
 
@@ -33,10 +36,16 @@ namespace SignalDelay
         {
             double time = Planetarium.GetUniversalTime();
             if (time <= lastUpdated) return;
-            if (IsActive) part.RequestResource(resourceId, ConsumptionRate * (time - lastUpdated));
+            if (IsActive)
+            {
+                actualECRate = (float)ConsumptionRate;
+                Fields["actualECRate"].guiActive = actualECRate > 0;
+                part.RequestResource(resourceId, actualECRate * (time - lastUpdated));
+            }
+            else Fields["effectiveECRate"].guiActive = false;
             lastUpdated = time;
         }
 
-        public override string GetInfo() => "Telemetry EC Usage: up to " + ecRate + "/s";
+        public override string GetInfo() => "Telemetry EC Usage: up to " + ecRate + "/sec";
     }
 }
