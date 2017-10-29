@@ -47,6 +47,7 @@ namespace SignalDelay
             if (GameSettings.HEADLIGHT_TOGGLE.GetKeyDown()) Enqueue(CommandType.LIGHT_TOGGLE);
             if (GameSettings.LANDING_GEAR.GetKeyDown()) Enqueue(CommandType.LANDING_GEAR);
             if (GameSettings.BRAKES.GetKeyDown()) Enqueue(CommandType.BRAKES);
+            if (GameSettings.BRAKES.GetKeyUp()) Enqueue(CommandType.BRAKES);
             if (GameSettings.RCS_TOGGLE.GetKeyDown()) Enqueue(CommandType.RCS_TOGGLE);
             if (GameSettings.SAS_TOGGLE.GetKeyDown()) Enqueue(CommandType.SAS_TOGGLE);
             if (GameSettings.SAS_HOLD.GetKeyDown()) Enqueue(CommandType.SAS_TOGGLE);
