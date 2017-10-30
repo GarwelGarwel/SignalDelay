@@ -30,7 +30,7 @@ namespace SignalDelay
             lastUpdated = Planetarium.GetUniversalTime();
         }
 
-        double ConsumptionRate => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.SignalStrength * (1 - SignalDelaySettings.ECBonus)) : 1);
+        double ConsumptionRate => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.ControlPath.First.signalStrength * (1 - SignalDelaySettings.ECBonus)) : 1);
 
         public void FixedUpdate()
         {
@@ -38,6 +38,7 @@ namespace SignalDelay
             if (time <= lastUpdated) return;
             if (IsActive)
             {
+                Core.Log("First link control path " + vessel.Connection.ControlPath.First.a.name + "-" + vessel.Connection.ControlPath.First.b.name + " strength: " + vessel.Connection.ControlPath.First.signalStrength);
                 actualECRate = (float)ConsumptionRate;
                 part.RequestResource(resourceId, actualECRate * (time - lastUpdated));
             }
