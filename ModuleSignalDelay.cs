@@ -38,7 +38,6 @@ namespace SignalDelay
             if (time <= lastUpdated) return;
             if (IsActive)
             {
-                Core.Log("First link control path " + vessel.Connection.ControlPath.First.a.name + "-" + vessel.Connection.ControlPath.First.b.name + " strength: " + vessel.Connection.ControlPath.First.signalStrength);
                 actualECRate = (float)ConsumptionRate;
                 part.RequestResource(resourceId, actualECRate * (time - lastUpdated));
             }
