@@ -14,7 +14,7 @@ The mod is in beta. Please report bugs via the GitHub [Issues tab](https://githu
 
 ## Required & Supported Mods
 
-- [Module Manageer](https://github.com/sarbian/ModuleManager) - required for EC usage feature
+- [Module Manager](https://github.com/sarbian/ModuleManager) - required for EC usage feature
 - [kOS](https://github.com/KSP-KOS/KOS) - terminal is supported, but all the commands are implemented without delay
 - [DMagic Orbital Science](https://github.com/DMagic1/Orbital-Science)
 - [JX2Antenna](https://github.com/KSPSnark/JX2Antenna)
