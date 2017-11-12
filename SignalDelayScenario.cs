@@ -9,7 +9,7 @@ namespace SignalDelay
         #region LIFE CYCLE METHODS
 
         public void Start()
-        { Vessel.OnFlyByWire += OnFlyByWire; }
+        {  }
 
         public void OnDisable()
         { Active = false; }
@@ -102,6 +102,7 @@ namespace SignalDelay
                 active = value;
                 if (active)
                 {
+                    Vessel.OnFlyByWire += OnFlyByWire;
                     FlightCtrlState = new FlightCtrlState()
                     { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
                     Core.Log("Cached throttle = " + throttleCache);
@@ -111,6 +112,7 @@ namespace SignalDelay
                 }
                 else
                 {
+                    Vessel.OnFlyByWire -= OnFlyByWire;
                     InputLockManager.RemoveControlLock("this");
                     if (SignalDelaySettings.DebugMode) Core.ShowNotification("Signal delay deactivated.");
                 }
@@ -118,7 +120,7 @@ namespace SignalDelay
         }
 
         public void CheckVessel()
-        { Active = SignalDelaySettings.IsEnabled && Vessel.Connection.IsConnected && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe; }
+        { Active = SignalDelaySettings.IsEnabled && (Vessel?.Connection?.IsConnected ?? false) && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe; }
 
         #endregion
         #region COMMAND QUEUE METHODS
@@ -190,8 +192,8 @@ namespace SignalDelay
 
         public void OnFlyByWire(FlightCtrlState fcs)
         {
-            //Core.Log(Core.FCSToString(fcs, "Input"));
-            //Core.Log(Core.FCSToString(FlightCtrlState, "Output"));
+            Core.Log(Core.FCSToString(fcs, "Input FCS"));
+            Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
             if (Active)
             {
                 if (Vessel.Autopilot.Enabled && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
@@ -209,10 +211,10 @@ namespace SignalDelay
                 fcs.pitch += FlightCtrlState.pitch;
                 fcs.yaw += FlightCtrlState.yaw;
                 fcs.roll += FlightCtrlState.roll;
-                fcs.wheelSteer += FlightCtrlState.wheelSteer;
                 if (fcs.mainThrottle == throttleCache)  // Checking whether throttle has been changed by any other mod such as kOS
-                    fcs.mainThrottle = FlightCtrlState.mainThrottle;
+                    fcs.mainThrottle = throttleCache = FlightCtrlState.mainThrottle;
                 else FlightCtrlState.mainThrottle = throttleCache = fcs.mainThrottle;
+                fcs.wheelSteer += FlightCtrlState.wheelSteer;
                 fcs.wheelThrottle = FlightCtrlState.wheelThrottle;
             }
         }
