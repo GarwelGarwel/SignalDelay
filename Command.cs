@@ -7,6 +7,7 @@ namespace SignalDelay
 {
     public enum CommandType
     {
+        NONE,
         LAUNCH_STAGES,
         PITCH_DOWN,
         PITCH_UP,
@@ -92,16 +93,16 @@ namespace SignalDelay
                     SignalDelayScenario.FlightCtrlState.mainThrottle += 0.01f * SignalDelaySettings.ThrottleSensitivity;
                     break;
                 case CommandType.WHEEL_STEER_LEFT:
-                    SignalDelayScenario.FlightCtrlState.wheelSteer = 0;
-                    break;
-                case CommandType.WHEEL_STEER_RIGHT:
                     SignalDelayScenario.FlightCtrlState.wheelSteer = 1;
                     break;
+                case CommandType.WHEEL_STEER_RIGHT:
+                    SignalDelayScenario.FlightCtrlState.wheelSteer = -1;
+                    break;
                 case CommandType.WHEEL_THROTTLE_DOWN:
-                    SignalDelayScenario.FlightCtrlState.wheelThrottle -= 0.01f;
+                    SignalDelayScenario.FlightCtrlState.wheelThrottle = -1;
                     break;
                 case CommandType.WHEEL_THROTTLE_UP:
-                    SignalDelayScenario.FlightCtrlState.wheelThrottle += 0.01f;
+                    SignalDelayScenario.FlightCtrlState.wheelThrottle = 1;
                     break;
                 case CommandType.LIGHT_TOGGLE:
                     v.ActionGroups.ToggleGroup(KSPActionGroup.Light);
@@ -173,7 +174,11 @@ namespace SignalDelay
             set
             {
                 try { Type = (CommandType)Enum.Parse(typeof(CommandType), value.GetValue("type")); }
-                catch (Exception) { Core.Log("Could not parse command type for this command: " + value, Core.LogLevel.Error); }
+                catch (Exception)
+                {
+                    Core.Log("Could not parse command type for this command: " + value, Core.LogLevel.Error);
+                    Type = CommandType.NONE;
+                }
                 Time = Core.GetDouble(value, "time");
             }
         }
@@ -186,7 +191,6 @@ namespace SignalDelay
             Time = time;
         }
 
-        public Command(ConfigNode node)
-        { ConfigNode = node; }
+        public Command(ConfigNode node) => ConfigNode = node;
     }
 }

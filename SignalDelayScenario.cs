@@ -8,18 +8,19 @@ namespace SignalDelay
     {
         #region LIFE CYCLE METHODS
 
-        public void Start()
-        {  }
+        public void Start() => CheckVessel();
 
-        public void OnDisable()
-        { Active = false; }
+        public void OnDisable() => Active = false;
 
+        /// <summary>
+        /// Checks key presses and SAS mode changes and queues them for execution if signal delay is active
+        /// </summary>
         public void Update()
         {
             //if (GameSettings.LANDING_GEAR.GetKeyDown()) SignalDelaySettings.IsEnabled = !SignalDelaySettings.IsEnabled;  // -- COMMENT AFTER TEST!!!
             if (!Active) return;
 
-            // Checking if kOS terminal is focused and locks control
+            // Checking if kOS terminal is focused and locks control => ignoring input then
             if (InputLockManager.lockStack.ContainsKey("kOSTerminal")) return;
 
             // Checking all key presses and enqueing corresponding actions
@@ -73,15 +74,30 @@ namespace SignalDelay
         }
 
         ScreenMessage delayMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_LEFT);
+
+        void FadeOut(ref float v, float amount)
+        {
+            if (v > amount) v -= amount;
+            else if (v < -amount) v += amount;
+            else v = 0;
+        }
+
         public void FixedUpdate()
         {
             CheckVessel();
-            delayRecalculated = false;
-            FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = FlightCtrlState.wheelSteer = FlightCtrlState.wheelThrottle = 0;
-            while (Planetarium.GetUniversalTime() >= Queue.NextCommandTime) Queue.Dequeue();
-            sasMode = Vessel.Autopilot.Mode;
+            Core.Log(Core.FCSToString(Vessel.ctrlState, "Vessel FCS"));
             if (!Active) return;
-            if (SignalDelaySettings.ShowDelay)
+            delayRecalculated = false;
+
+            FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = 0;
+            FadeOut(ref FlightCtrlState.wheelSteer, 0.1f);
+            FadeOut(ref FlightCtrlState.wheelThrottle, 0.1f);
+
+            while (Planetarium.GetUniversalTime() >= Queue.NextCommandTime) Queue.Dequeue();
+
+            sasMode = Vessel.Autopilot.Mode;
+
+            if (SignalDelaySettings.ShowDelay) 
             {
                 delayMsg.message = "Delay: " + Core.FormatTime(Delay);
                 ScreenMessages.PostScreenMessage(delayMsg);
@@ -92,6 +108,10 @@ namespace SignalDelay
         #region MOD CONTROL METHODS
 
         bool active;
+
+        /// <summary>
+        /// Whether signal delay should be applied
+        /// </summary>
         bool Active
         {
             get => active;
@@ -103,11 +123,10 @@ namespace SignalDelay
                 if (active)
                 {
                     Vessel.OnFlyByWire += OnFlyByWire;
-                    FlightCtrlState = new FlightCtrlState()
-                    { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
+                    FlightCtrlState = new FlightCtrlState() { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
                     Core.Log("Cached throttle = " + throttleCache);
                     sasMode = Vessel.Autopilot.Mode;
-                    InputLockManager.SetControlLock(SignalDelaySettings.HidePartActions ? ControlTypes.ALL_SHIP_CONTROLS : ControlTypes.ALL_SHIP_CONTROLS ^ ControlTypes.ACTIONS_SHIP, "this");
+                    InputLockManager.SetControlLock(SignalDelaySettings.HidePartActions ? ControlTypes.ALL_SHIP_CONTROLS : ControlTypes.ALL_SHIP_CONTROLS ^ (ControlTypes.ACTIONS_SHIP | ControlTypes.TWEAKABLES), "this");
                     if (SignalDelaySettings.DebugMode) Core.ShowNotification("Signal delay activated.");
                 }
                 else
@@ -119,6 +138,9 @@ namespace SignalDelay
             }
         }
 
+        /// <summary>
+        /// Checks whether signal delay should be applied to the active vessel
+        /// </summary>
         public void CheckVessel()
         { Active = SignalDelaySettings.IsEnabled && (Vessel?.Connection?.IsConnected ?? false) && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe; }
 
@@ -157,6 +179,10 @@ namespace SignalDelay
 
         bool delayRecalculated = false;
         double delay;
+
+        /// <summary>
+        /// Current signal delay in seconds
+        /// </summary>
         public double Delay
         {
             get
@@ -190,9 +216,12 @@ namespace SignalDelay
         VesselAutopilot.AutopilotMode sasMode;
         bool sasPaused = false;
 
+        /// <summary>
+        /// Updates FlightCtrlState for the active vessel
+        /// </summary>
+        /// <param name="fcs"></param>
         public void OnFlyByWire(FlightCtrlState fcs)
         {
-            Core.Log(Core.FCSToString(fcs, "Input FCS"));
             Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
             if (Active)
             {
@@ -208,17 +237,20 @@ namespace SignalDelay
                     Vessel.Autopilot.Enable();
                     sasPaused = false;
                 }
+
                 fcs.pitch += FlightCtrlState.pitch;
                 fcs.yaw += FlightCtrlState.yaw;
                 fcs.roll += FlightCtrlState.roll;
-                if (fcs.mainThrottle == throttleCache)  // Checking whether throttle has been changed by any other mod such as kOS
-                    fcs.mainThrottle = throttleCache = FlightCtrlState.mainThrottle;
-                else FlightCtrlState.mainThrottle = throttleCache = fcs.mainThrottle;
-                fcs.wheelSteer += FlightCtrlState.wheelSteer;
+                if (fcs.mainThrottle == throttleCache) fcs.mainThrottle = FlightCtrlState.mainThrottle;
+                else
+                {
+                    Core.Log("Throttle has been changed from " + throttleCache + " to " + fcs.mainThrottle + " by another mod.");
+                    FlightCtrlState.mainThrottle = throttleCache = fcs.mainThrottle;
+                }
+                fcs.wheelSteer = FlightCtrlState.wheelSteer;
                 fcs.wheelThrottle = FlightCtrlState.wheelThrottle;
             }
         }
         #endregion
     }
 }
-
