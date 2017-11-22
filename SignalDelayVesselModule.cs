@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CommNet;
+﻿using CommNet;
 
 namespace SignalDelay
 {

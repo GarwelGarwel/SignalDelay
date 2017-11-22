@@ -5,8 +5,17 @@ namespace SignalDelay
 {
     class Core
     {
+        /// <summary>
+        /// Returns effective light speed for signal delay calculation (half the speed if round trip is enabled)
+        /// </summary>
         public static double LightSpeed => SignalDelaySettings.LightSpeed / (SignalDelaySettings.RoundTrip ? 2 : 1);
 
+        /// <summary>
+        /// Formats time as a string, e.g. 876 d 5 h 43 m 21.09 s
+        /// </summary>
+        /// <param name="time">Time in seconds</param>
+        /// <param name="digits">Number of floating-point digits in seconds, default = 2</param>
+        /// <returns></returns>
         public static string FormatTime(double time, int digits = 2)
         {
             double t = time;
@@ -37,14 +46,25 @@ namespace SignalDelay
             return res;
         }
 
-        public static double GetDouble(ConfigNode n, string key, double defaultValue = 0)
+        /// <summary>
+        /// Returns a Double from the ConfigNode or default value
+        /// </summary>
+        /// <param name="node">ConfigNode to search the value in</param>
+        /// <param name="key">Key of the value</param>
+        /// <param name="defaultValue">Value to return if the key is not found/in invalid format</param>
+        /// <returns></returns>
+        public static double GetDouble(ConfigNode node, string key, double defaultValue = 0)
         {
-            double res;
-            try { res = Double.Parse(n.GetValue(key)); }
-            catch (Exception) { res = defaultValue; }
-            return res;
+            double res = 0;
+            return node.TryGetValue(key, ref res) ? res : defaultValue;
         }
 
+        /// <summary>
+        /// Prints non-zero values in a FlightCtrlState to a string, with a title
+        /// </summary>
+        /// <param name="flightCtrlState">FlightCtrlState</param>
+        /// <param name="title">Title to apply to the string</param>
+        /// <returns>Human-readable string with values or empty if flightCtrlState is all zeroes</returns>
         public static string FCSToString(FlightCtrlState flightCtrlState, string title = "")
         {
             string res = "";
@@ -55,9 +75,15 @@ namespace SignalDelay
             if (flightCtrlState.roll != 0) res += "Roll: " + flightCtrlState.roll + "   ";
             if (flightCtrlState.rollTrim != 0) res += "Roll Trim: " + flightCtrlState.rollTrim + "   ";
             if (flightCtrlState.mainThrottle != 0) res += "Throttle: " + flightCtrlState.mainThrottle;
+            if (flightCtrlState.wheelSteer != 0) res += "Wheel Steer: " + flightCtrlState.wheelSteer + "   ";
+            if (flightCtrlState.wheelThrottle != 0) res += "Wheel Throttle: " + flightCtrlState.wheelThrottle + "   ";
             return (((title != "") && (res != "")) ? title + ": " : "") + res;
         }
 
+        /// <summary>
+        /// Posts a screen message
+        /// </summary>
+        /// <param name="msg"></param>
         public static void ShowNotification(string msg) => ScreenMessages.PostScreenMessage(msg);
 
         /// <summary>
