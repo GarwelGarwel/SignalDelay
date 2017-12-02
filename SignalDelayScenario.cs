@@ -1,5 +1,4 @@
-﻿using System;
-using CommNet;
+﻿using CommNet;
 
 namespace SignalDelay
 {
@@ -8,9 +7,23 @@ namespace SignalDelay
     {
         #region LIFE CYCLE METHODS
 
-        public void Start() => CheckVessel();
+        public void Start()
+        {
+            GameEvents.onVesselSwitching.Add(OnVesselSwitching);
+            CheckVessel();
+        }
 
-        public void OnDisable() => Active = false;
+        public void OnDisable()
+        {
+            GameEvents.onVesselSwitching.Remove(OnVesselSwitching);
+            Active = false;
+        }
+
+        public void OnVesselSwitching(Vessel from, Vessel to)
+        {
+            Core.Log("OnVesselSwitching('" + from.vesselName + "', '" + to.vesselName + "')", Core.LogLevel.Important);
+            Active = false;
+        }
 
         /// <summary>
         /// Checks key presses and SAS mode changes and queues them for execution if signal delay is active
@@ -166,7 +179,6 @@ namespace SignalDelay
         {
             double time = Planetarium.GetUniversalTime();
             Core.Log("Adding command " + commandType + " at " + time + ".");
-            //if (SignalDelaySettings.DebugMode) Core.ShowNotification("Input: " + commandType.ToString());
             Command c = new Command(commandType, time + Delay);
             foreach (object p in par) c.Params.Add(p);
             Queue.Enqueue(c);
