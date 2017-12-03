@@ -7,11 +7,7 @@ namespace SignalDelay
     {
         #region LIFE CYCLE METHODS
 
-        public void Start()
-        {
-            GameEvents.onVesselSwitching.Add(OnVesselSwitching);
-            CheckVessel();
-        }
+        public void Start() => GameEvents.onVesselSwitching.Add(OnVesselSwitching);
 
         public void OnDisable()
         {
@@ -19,6 +15,9 @@ namespace SignalDelay
             Active = false;
         }
 
+        /// <summary>
+        /// Deactivates signal delay before switching vessels
+        /// </summary>
         public void OnVesselSwitching(Vessel from, Vessel to)
         {
             Core.Log("OnVesselSwitching('" + from.vesselName + "', '" + to.vesselName + "')", Core.LogLevel.Important);
@@ -154,12 +153,14 @@ namespace SignalDelay
         /// <summary>
         /// Checks whether signal delay should be applied to the active vessel
         /// </summary>
-        public void CheckVessel()
-        { Active = SignalDelaySettings.IsEnabled && (Vessel?.Connection?.IsConnected ?? false) && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe; }
+        public void CheckVessel() => Active = SignalDelaySettings.IsEnabled && (Vessel?.Connection?.IsConnected ?? false) && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe;
 
         #endregion
         #region COMMAND QUEUE METHODS
 
+        /// <summary>
+        /// Active vessel's command queue
+        /// </summary>
         public CommandQueue Queue
         {
             get
@@ -175,6 +176,11 @@ namespace SignalDelay
             }
         }
 
+        /// <summary>
+        /// Adds a command with possible parameters to the queue
+        /// </summary>
+        /// <param name="commandType"></param>
+        /// <param name="par"></param>
         void Enqueue(CommandType commandType, params object[] par)
         {
             double time = Planetarium.GetUniversalTime();
