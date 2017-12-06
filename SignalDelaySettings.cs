@@ -60,7 +60,7 @@ namespace SignalDelay
         }
 
         [GameParameters.CustomParameterUI("Display Delay", toolTip = "Show delay, in seconds, in the top-left corner")]
-        public bool showDelay = false;
+        public bool showDelay = true;
         public static bool ShowDelay
         {
             get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().showDelay;
@@ -84,7 +84,7 @@ namespace SignalDelay
         }
 
         [GameParameters.CustomParameterUI("Debug Mode", toolTip = "Verbose logging, obligatory for bug submissions")]
-        public bool debugMode = true;
+        public bool debugMode = false;
         public static bool DebugMode
         {
             get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().debugMode;
