@@ -172,7 +172,11 @@ namespace SignalDelay
             set
             {
                 foreach (VesselModule vm in Vessel.vesselModules)
-                    if (vm is SignalDelayVesselModule) ((SignalDelayVesselModule)vm).Queue = value;
+                    if (vm is SignalDelayVesselModule)
+                    {
+                        ((SignalDelayVesselModule)vm).Queue = value;
+                        return;
+                    }
             }
         }
 
@@ -240,9 +244,9 @@ namespace SignalDelay
         /// <param name="fcs"></param>
         public void OnFlyByWire(FlightCtrlState fcs)
         {
-            Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
             if (Active)
             {
+                Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
                 if (Vessel.Autopilot.Enabled && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
                 {
                     Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.", Core.LogLevel.Important);

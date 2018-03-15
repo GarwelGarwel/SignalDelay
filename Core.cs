@@ -103,7 +103,7 @@ namespace SignalDelay
         public static LogLevel Level => SignalDelaySettings.DebugMode ? LogLevel.Debug : LogLevel.Important;
 
         /// <summary>
-        /// Write into output_log.txt
+        /// Write the message into log file if <see cref="LogLevel"/> >= messageLevel
         /// </summary>
         /// <param name="message">Text to log</param>
         /// <param name="messageLevel"><see cref="LogLevel"/> of the entry</param>
