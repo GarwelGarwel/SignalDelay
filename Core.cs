@@ -24,21 +24,21 @@ namespace SignalDelay
             bool show0 = false;
             if (t >= KSPUtil.dateTimeFormatter.Day)
             {
-                d = (int)Math.Floor(time / KSPUtil.dateTimeFormatter.Day);
+                d = (int)Math.Floor(t / KSPUtil.dateTimeFormatter.Day);
                 t -= d * KSPUtil.dateTimeFormatter.Day;
                 res += d + " d ";
                 show0 = true;
             }
             if ((t >= 3600) || show0)
             {
-                h = (int)Math.Floor(time / 3600);
+                h = (int)Math.Floor(t / 3600);
                 t -= h * 3600;
                 res += h + " h ";
                 show0 = true;
             }
             if ((t >= 60) || show0)
             {
-                m = (int)Math.Floor(time / 60);
+                m = (int)Math.Floor(t / 60);
                 t -= m * 60;
                 res += m + " m ";
             }
