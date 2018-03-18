@@ -42,7 +42,7 @@ namespace SignalDelay
                 t -= m * 60;
                 res += m + " m ";
             }
-            res += t.ToString("F" + digits) + " s";
+            if ((time < 1) || (Math.Round(t, digits) > 0)) res += t.ToString("F" + digits) + " s";
             return res;
         }
 
