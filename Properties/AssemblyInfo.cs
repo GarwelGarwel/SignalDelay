@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Adds signal delay for probes in KSP CommNet")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SignalDelay.Properties")]
+[assembly: AssemblyProduct("")]
 [assembly: AssemblyCopyright("(c) Garwel 2017-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("0.2.4")]
-[assembly: AssemblyFileVersion("0.2.4")]
+[assembly: AssemblyVersion("0.2.5")]
+[assembly: AssemblyFileVersion("0.2.5")]
