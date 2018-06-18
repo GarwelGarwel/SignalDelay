@@ -107,6 +107,7 @@
     <Compile Include="SignalDelayVesselModule.cs" />
     <Compile Include="SignalDelayScenario.cs" />
     <Compile Include="SignalDelaySettings.cs" />
+    <Compile Include="ToolbarWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Patches\Stock.cfg" />
