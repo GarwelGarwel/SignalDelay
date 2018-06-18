@@ -103,11 +103,18 @@ namespace SignalDelay
         public static LogLevel Level => SignalDelaySettings.DebugMode ? LogLevel.Debug : LogLevel.Important;
 
         /// <summary>
+        /// Returns true if message with the given level should be logged under current settings
+        /// </summary>
+        /// <param name="messageLevel"></param>
+        /// <returns></returns>
+        public static bool IsLogging(LogLevel messageLevel = LogLevel.Debug) => messageLevel <= Level;
+
+        /// <summary>
         /// Write the message into log file if <see cref="LogLevel"/> >= messageLevel
         /// </summary>
         /// <param name="message">Text to log</param>
         /// <param name="messageLevel"><see cref="LogLevel"/> of the entry</param>
         public static void Log(string message, LogLevel messageLevel = LogLevel.Debug)
-        { if ((messageLevel <= Level) && (message != "")) Debug.Log("[SignalDelay] " + (messageLevel == LogLevel.Error ? "ERROR: " : "") + message); }
+        { if (IsLogging(messageLevel) && (message != "")) Debug.Log("[SignalDelay] " + (messageLevel == LogLevel.Error ? "ERROR: " : "") + message); }
     }
 }

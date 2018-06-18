@@ -1,4 +1,7 @@
-﻿using CommNet;
+﻿using System.IO;
+using UnityEngine;
+using KSP.UI.Screens;
+using CommNet;
 
 namespace SignalDelay
 {
@@ -7,22 +10,47 @@ namespace SignalDelay
     {
         #region LIFE CYCLE METHODS
 
-        public void Start() => GameEvents.onVesselSwitching.Add(OnVesselSwitching);
+        IButton toolbarButton;
+        ApplicationLauncherButton appLauncherButton;
+
+        public void Start()
+        {
+            GameEvents.onVesselSwitching.Add(OnVesselSwitching);
+
+            // Setup Blizzy's Toolbar button
+            if (ToolbarManager.ToolbarAvailable)
+            {
+                Core.Log("Registering Blizzy's Toolbar button...", Core.LogLevel.Important);
+                toolbarButton = ToolbarManager.Instance.add("SignalDelay", "SignalDelay");
+                toolbarButton.Text = "Signal Delay";
+                toolbarButton.TexturePath = "SignalDelay/icon24";
+                toolbarButton.ToolTip = "Switch Signal Delay";
+                toolbarButton.OnClick += (e) => { ToggleMod(); };
+            }
+
+            // Setup AppLauncher button
+            if (SignalDelaySettings.AppLauncherButton)
+            {
+                Core.Log("Registering AppLauncher button...", Core.LogLevel.Important);
+                Texture2D icon = new Texture2D(38, 38);
+                icon.LoadImage(File.ReadAllBytes(System.IO.Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
+                appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
+            }
+        }
 
         public void OnDisable()
         {
             GameEvents.onVesselSwitching.Remove(OnVesselSwitching);
+            if (toolbarButton != null) toolbarButton.Destroy();
+            if ((appLauncherButton != null) && (ApplicationLauncher.Instance != null))
+                ApplicationLauncher.Instance.RemoveModApplication(appLauncherButton);
             Active = false;
         }
 
         /// <summary>
         /// Deactivates signal delay before switching vessels
         /// </summary>
-        public void OnVesselSwitching(Vessel from, Vessel to)
-        {
-            Core.Log("OnVesselSwitching('" + from.vesselName + "', '" + to.vesselName + "')", Core.LogLevel.Important);
-            Active = false;
-        }
+        public void OnVesselSwitching(Vessel from, Vessel to) => Active = false;
 
         /// <summary>
         /// Checks key presses and SAS mode changes and queues them for execution if signal delay is active
@@ -97,6 +125,8 @@ namespace SignalDelay
         public void FixedUpdate()
         {
             CheckVessel();
+            if (appLauncherButton != null) appLauncherButton.enabled = IsConnected && IsProbe;
+            if (toolbarButton != null) toolbarButton.Enabled = IsConnected && IsProbe;
             Core.Log(Core.FCSToString(Vessel.ctrlState, "Vessel FCS"));
             if (!Active) return;
             delayRecalculated = false;
@@ -109,7 +139,7 @@ namespace SignalDelay
 
             sasMode = Vessel.Autopilot.Mode;
 
-            if (SignalDelaySettings.ShowDelay) 
+            if (SignalDelaySettings.ShowDelay)
             {
                 delayMsg.message = "Delay: " + Core.FormatTime(Delay);
                 ScreenMessages.PostScreenMessage(delayMsg);
@@ -118,6 +148,8 @@ namespace SignalDelay
 
         #endregion
         #region MOD CONTROL METHODS
+
+        public void ToggleMod() => SignalDelaySettings.IsEnabled = !SignalDelaySettings.IsEnabled;
 
         bool active;
 
@@ -150,10 +182,13 @@ namespace SignalDelay
             }
         }
 
+        public bool IsConnected => Vessel?.Connection?.IsConnected ?? false;
+        public bool IsProbe => (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe;
+
         /// <summary>
         /// Checks whether signal delay should be applied to the active vessel
         /// </summary>
-        public void CheckVessel() => Active = SignalDelaySettings.IsEnabled && (Vessel?.Connection?.IsConnected ?? false) && (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe;
+        public void CheckVessel() => Active = SignalDelaySettings.IsEnabled && IsConnected && IsProbe;
 
         #endregion
         #region COMMAND QUEUE METHODS
@@ -246,16 +281,16 @@ namespace SignalDelay
         {
             if (Active)
             {
-                Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
+                if (Core.IsLogging()) Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
                 if (Vessel.Autopilot.Enabled && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
                 {
-                    Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.", Core.LogLevel.Important);
+                    Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.");
                     Vessel.Autopilot.Disable();
                     sasPaused = true;
                 }
                 else if (sasPaused)
                 {
-                    Core.Log("No user steering. Re-enabling autopilot.", Core.LogLevel.Important);
+                    Core.Log("No user steering. Re-enabling autopilot.");
                     Vessel.Autopilot.Enable();
                     sasPaused = false;
                 }

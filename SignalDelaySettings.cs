@@ -83,6 +83,14 @@ namespace SignalDelay
             set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().ecBonus = value;
         }
 
+        [GameParameters.CustomParameterUI("AppLauncher Button", toolTip = "Show an AppLauncher button to quickly disable/enable delay")]
+        public bool appLauncherButton = true;
+        public static bool AppLauncherButton
+        {
+            get => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().appLauncherButton;
+            set => HighLogic.CurrentGame.Parameters.CustomParams<SignalDelaySettings>().appLauncherButton = value;
+        }
+
         [GameParameters.CustomParameterUI("Debug Mode", toolTip = "Verbose logging, obligatory for bug submissions")]
         public bool debugMode = false;
         public static bool DebugMode
