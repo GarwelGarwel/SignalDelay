@@ -6,7 +6,7 @@ This mod adds signal delay for probes in KSP, based on their CommNet connectivit
 
 Antennas also now use Electric Charge (when deployed) for telemetry. Depending on signal strength (only the first link matters), EC usage can decrease up to 50%.
 
-All the features can be enabled, disabled or adjusted via in-game Settings.
+All the features can be enabled, disabled or adjusted by clicking the toolbar button (stock and Blizzy's toolbars supported) or via in-game Settings.
 
 ## Status
 
@@ -15,6 +15,7 @@ The mod is in beta. Please report bugs via the GitHub [Issues tab](https://githu
 ## Required & Supported Mods
 
 - [Module Manager](https://github.com/sarbian/ModuleManager) - required for EC usage feature
+- [Blizzy's Toolbar](https://forum.kerbalspaceprogram.com/index.php?/topic/161857-13-*)
 - [kOS](https://github.com/KSP-KOS/KOS) - terminal is supported, but all the commands are implemented without delay. You may use WAIT command to simulate delay.
 - [DMagic Orbital Science](https://github.com/DMagic1/Orbital-Science)
 - [JX2Antenna](https://github.com/KSPSnark/JX2Antenna)
