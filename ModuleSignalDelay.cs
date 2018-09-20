@@ -25,7 +25,7 @@ namespace SignalDelay
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
-            Core.Log("Start() in part " + part.name);
+            Core.Log("OnStart(" + state + ") in part " + part.name);
             resourceId = PartResourceLibrary.Instance.GetDefinition("ElectricCharge").id;
             lastUpdated = Planetarium.GetUniversalTime();
         }
