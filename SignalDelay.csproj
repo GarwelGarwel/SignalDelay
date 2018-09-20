@@ -87,12 +87,13 @@
     <None Include=".vs\SignalDelay\v15\.suo" />
     <None Include=".vs\slnx.sqlite" />
     <None Include=".vs\VSWorkspaceState.json" />
-    <None Include="Patches\JX2.cfg" />
-    <None Include="Patches\MKS.cfg" />
-    <None Include="Patches\RTRA.cfg" />
-    <None Include="Patches\SEP.cfg" />
+    <None Include="GameData\SignalDelay\LICENSE" />
+    <None Include="GameData\SignalDelay\Patches\JX2.cfg" />
+    <None Include="GameData\SignalDelay\Patches\MKS.cfg" />
+    <None Include="GameData\SignalDelay\Patches\RTRA.cfg" />
+    <None Include="GameData\SignalDelay\Patches\SEP.cfg" />
     <None Include="README.md" />
-    <None Include="SignalDelay.version" />
+    <None Include="GameData\SignalDelay\SignalDelay.version" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include=".git\objects\info\" />
@@ -111,10 +112,14 @@
     <Compile Include="ToolbarWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Patches\Stock.cfg" />
+    <None Include="GameData\SignalDelay\Patches\Stock.cfg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Patches\DMOrbitalScience.cfg" />
+    <None Include="GameData\SignalDelay\Patches\DMOrbitalScience.cfg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GameData\SignalDelay\icon128.png" />
+    <Content Include="GameData\SignalDelay\icon24.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
