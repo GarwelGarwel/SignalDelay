@@ -18,9 +18,11 @@ The mod is in beta. Please report bugs via the GitHub [Issues tab](https://githu
 - [Blizzy's Toolbar](https://forum.kerbalspaceprogram.com/index.php?/topic/161857-13-*)
 - [kOS](https://github.com/KSP-KOS/KOS) - terminal is supported, but all the commands are implemented without delay. You may use WAIT command to simulate delay.
 - [DMagic Orbital Science](https://github.com/DMagic1/Orbital-Science)
+- [Global Construction](https://forum.kerbalspaceprogram.com/index.php?/topic/154167-145-global-construction/)
 - [JX2Antenna](https://github.com/KSPSnark/JX2Antenna)
-- [USI Kolonization Systems (MKS)](https://github.com/UmbraSpaceIndustries/MKS)
+- [RemoteTech Redev Antennas](https://forum.kerbalspaceprogram.com/index.php?/topic/139167-144-remotetech-v1812-2018-07-17/)
 - [Surface Experiment Pack (SEP)](https://github.com/CobaltWolf/Surface-Experiment-Pack)
+- [USI Kolonization Systems (MKS)](https://github.com/UmbraSpaceIndustries/MKS)
 
 ## Known Issues
 

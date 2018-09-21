@@ -88,6 +88,7 @@
     <None Include=".vs\slnx.sqlite" />
     <None Include=".vs\VSWorkspaceState.json" />
     <None Include="GameData\SignalDelay\LICENSE" />
+    <None Include="GameData\SignalDelay\Patches\GC.cfg" />
     <None Include="GameData\SignalDelay\Patches\JX2.cfg" />
     <None Include="GameData\SignalDelay\Patches\MKS.cfg" />
     <None Include="GameData\SignalDelay\Patches\RTRA.cfg" />
