@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace SignalDelay
 {
@@ -18,15 +15,16 @@ namespace SignalDelay
 
         public List<PartResourceDefinition> GetConsumedResources() => new List<PartResourceDefinition>() { PartResourceLibrary.Instance.GetDefinition("ElectricCharge") };
 
-        ModuleDeployableAntenna DeployableAntenna => part.FindModuleImplementing<ModuleDeployableAntenna>();
+        ModuleDeployableAntenna deployableAntenna;
 
-        bool IsActive => SignalDelaySettings.IsECUsageEnabled && ((DeployableAntenna == null) || (DeployableAntenna.deployState == ModuleDeployablePart.DeployState.EXTENDED));
+        bool IsActive => SignalDelaySettings.IsECUsageEnabled && ((deployableAntenna == null) || (deployableAntenna.deployState == ModuleDeployablePart.DeployState.EXTENDED));
 
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
             Core.Log("OnStart(" + state + ") in part " + part.name);
             resourceId = PartResourceLibrary.Instance.GetDefinition("ElectricCharge").id;
+            deployableAntenna = part.FindModuleImplementing<ModuleDeployableAntenna>();
             lastUpdated = Planetarium.GetUniversalTime();
         }
 
