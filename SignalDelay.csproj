@@ -57,36 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include=".git\config" />
-    <None Include=".git\description" />
-    <None Include=".git\HEAD" />
-    <None Include=".git\hooks\applypatch-msg.sample" />
-    <None Include=".git\hooks\commit-msg.sample" />
-    <None Include=".git\hooks\post-update.sample" />
-    <None Include=".git\hooks\pre-applypatch.sample" />
-    <None Include=".git\hooks\pre-commit.sample" />
-    <None Include=".git\hooks\pre-push.sample" />
-    <None Include=".git\hooks\pre-rebase.sample" />
-    <None Include=".git\hooks\pre-receive.sample" />
-    <None Include=".git\hooks\prepare-commit-msg.sample" />
-    <None Include=".git\hooks\update.sample" />
-    <None Include=".git\index" />
-    <None Include=".git\info\exclude" />
-    <None Include=".git\logs\HEAD" />
-    <None Include=".git\logs\refs\heads\master" />
-    <None Include=".git\logs\refs\remotes\origin\HEAD" />
-    <None Include=".git\objects\00\e35a79117028f954e2abec6cb535369ad45384" />
-    <None Include=".git\objects\28\389b821d2b437a32a40a6cc2aafffb55453283" />
-    <None Include=".git\objects\33\ddd33a3d558df8a91093f0880d6fb605c79737" />
-    <None Include=".git\objects\94\0794e60f21bbcbd6a04b87b08ac92ab9303511" />
-    <None Include=".git\objects\fc\826de264823449c29e7cb6533f15079a5448c9" />
-    <None Include=".git\packed-refs" />
-    <None Include=".git\refs\heads\master" />
-    <None Include=".git\refs\remotes\origin\HEAD" />
-    <None Include=".vs\ProjectSettings.json" />
-    <None Include=".vs\SignalDelay\v15\.suo" />
-    <None Include=".vs\slnx.sqlite" />
-    <None Include=".vs\VSWorkspaceState.json" />
     <None Include="GameData\SignalDelay\LICENSE" />
     <None Include="GameData\SignalDelay\Patches\CNAX.cfg" />
     <None Include="GameData\SignalDelay\Patches\GC.cfg" />
@@ -97,11 +67,7 @@
     <None Include="README.md" />
     <None Include="GameData\SignalDelay\SignalDelay.version" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include=".git\objects\info\" />
-    <Folder Include=".git\objects\pack\" />
-    <Folder Include=".git\refs\tags\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="Command.cs" />
     <Compile Include="CommandQueue.cs" />
