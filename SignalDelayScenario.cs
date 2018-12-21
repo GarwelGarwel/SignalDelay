@@ -48,9 +48,13 @@ namespace SignalDelay
         }
 
         /// <summary>
-        /// Deactivates signal delay before switching vessels
+        /// Deactivates signal delay before switching vessels; resets button's enabled state
         /// </summary>
-        public void OnVesselSwitching(Vessel from, Vessel to) => Active = false;
+        public void OnVesselSwitching(Vessel from, Vessel to)
+        {
+            Active = false;
+            ResetButtonState();
+        }
 
         /// <summary>
         /// Checks key presses and SAS mode changes and queues them for execution if signal delay is active
@@ -151,6 +155,21 @@ namespace SignalDelay
 
         public void ToggleMod() => SignalDelaySettings.IsEnabled = !SignalDelaySettings.IsEnabled;
 
+        void ResetButtonState()
+        {
+            if (appLauncherButton != null)
+            {
+                Core.Log("The active vessel is " + (IsProbe ? "" : "not") + " a probe. Setting AppLauncher button enabled state.");
+                if (IsProbe) appLauncherButton.Enable(); else appLauncherButton.Disable();
+                //appLauncherButton.enabled = IsProbe;
+            }
+            if (toolbarButton != null)
+            {
+                Core.Log("The active vessel is " + (IsProbe ? "" : "not") + " a probe. Setting Tooblar button enabled state.");
+                toolbarButton.Enabled = IsProbe;
+            }
+        }
+
         bool active;
 
         /// <summary>
@@ -164,6 +183,7 @@ namespace SignalDelay
                 if (value == active) return;
                 Core.Log("Active = " + value);
                 active = value;
+                ResetButtonState();
                 if (active)
                 {
                     Vessel.OnFlyByWire += OnFlyByWire;
@@ -183,7 +203,7 @@ namespace SignalDelay
         }
 
         public bool IsConnected => Vessel?.Connection?.IsConnected ?? false;
-        public bool IsProbe => (Vessel.Connection.ControlState & VesselControlState.Probe) == VesselControlState.Probe;
+        public bool IsProbe => (Vessel.Connection.ControlState & VesselControlState.Probe) != 0;
 
         /// <summary>
         /// Checks whether signal delay should be applied to the active vessel
