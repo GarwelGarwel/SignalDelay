@@ -12,10 +12,12 @@ namespace SignalDelay
 
         IButton toolbarButton;
         ApplicationLauncherButton appLauncherButton;
+        Texture2D icon = new Texture2D(38, 38);
 
         public void Start()
         {
             GameEvents.onVesselSwitching.Add(OnVesselSwitching);
+            GameEvents.CommNet.OnCommStatusChange.Add(ResetButtonState);
 
             // Setup Blizzy's Toolbar button
             if (ToolbarManager.ToolbarAvailable)
@@ -27,20 +29,14 @@ namespace SignalDelay
                 toolbarButton.ToolTip = "Switch Signal Delay";
                 toolbarButton.OnClick += (e) => { ToggleMod(); };
             }
-
-            // Setup AppLauncher button
-            if (SignalDelaySettings.AppLauncherButton)
-            {
-                Core.Log("Registering AppLauncher button...", Core.LogLevel.Important);
-                Texture2D icon = new Texture2D(38, 38);
-                icon.LoadImage(File.ReadAllBytes(System.IO.Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
-                appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
-            }
+            icon.LoadImage(File.ReadAllBytes(System.IO.Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
+            ResetButtonState();
         }
 
         public void OnDisable()
         {
             GameEvents.onVesselSwitching.Remove(OnVesselSwitching);
+            GameEvents.CommNet.OnCommStatusChange.Remove(ResetButtonState);
             if (toolbarButton != null) toolbarButton.Destroy();
             if ((appLauncherButton != null) && (ApplicationLauncher.Instance != null))
                 ApplicationLauncher.Instance.RemoveModApplication(appLauncherButton);
@@ -52,6 +48,7 @@ namespace SignalDelay
         /// </summary>
         public void OnVesselSwitching(Vessel from, Vessel to)
         {
+            Core.Log("OnVesselSwitching(" + from.vesselName + ", " + to.vesselName + ")");
             Active = false;
             ResetButtonState();
         }
@@ -61,7 +58,6 @@ namespace SignalDelay
         /// </summary>
         public void Update()
         {
-            //if (GameSettings.LANDING_GEAR.GetKeyDown()) SignalDelaySettings.IsEnabled = !SignalDelaySettings.IsEnabled;  // -- COMMENT AFTER TEST!!!
             if (!Active) return;
 
             // Checking if kOS terminal is focused and locks control => ignoring input then
@@ -129,17 +125,16 @@ namespace SignalDelay
         public void FixedUpdate()
         {
             CheckVessel();
-            if (appLauncherButton != null) appLauncherButton.enabled = IsConnected && IsProbe;
-            if (toolbarButton != null) toolbarButton.Enabled = IsConnected && IsProbe;
-            Core.Log(Core.FCSToString(Vessel.ctrlState, "Vessel FCS"));
             if (!Active) return;
+            Core.Log(Core.FCSToString(Vessel.ctrlState, "Vessel FCS"));
             delayRecalculated = false;
 
             FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = 0;
             FadeOut(ref FlightCtrlState.wheelSteer, 0.1f);
             FadeOut(ref FlightCtrlState.wheelThrottle, 0.1f);
 
-            while (Planetarium.GetUniversalTime() >= Queue.NextCommandTime) Queue.Dequeue();
+            double time = Planetarium.GetUniversalTime();
+            while (time >= Queue.NextCommandTime) Queue.Dequeue();
 
             sasMode = Vessel.Autopilot.Mode;
 
@@ -153,21 +148,29 @@ namespace SignalDelay
         #endregion
         #region MOD CONTROL METHODS
 
+        /// <summary>
+        /// Toggles mod's enabled state on button click
+        /// </summary>
         public void ToggleMod() => SignalDelaySettings.IsEnabled = !SignalDelaySettings.IsEnabled;
 
+        /// <summary>
+        /// Enables or disables the AppLauncher/Toolbar button based on vessel's control type (probe or not) and connection state
+        /// </summary>
         void ResetButtonState()
         {
-            if (appLauncherButton != null)
-            {
-                Core.Log("The active vessel is " + (IsProbe ? "" : "not") + " a probe. Setting AppLauncher button enabled state.");
-                if (IsProbe) appLauncherButton.Enable(); else appLauncherButton.Disable();
-                //appLauncherButton.enabled = IsProbe;
-            }
-            if (toolbarButton != null)
-            {
-                Core.Log("The active vessel is " + (IsProbe ? "" : "not") + " a probe. Setting Tooblar button enabled state.");
-                toolbarButton.Enabled = IsProbe;
-            }
+            Core.Log("IsConnected = " + IsConnected + "; IsProbe = " + IsProbe + ", AppLauncher button is " + (appLauncherButton == null ? "" : "not ") + "null; Toolbar button is " + (toolbarButton == null ? "" : "not ") + "null.");
+            bool showButton = IsConnected && IsProbe;
+            if (showButton && SignalDelaySettings.AppLauncherButton && (appLauncherButton == null))
+                appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
+            else if ((appLauncherButton != null) && (ApplicationLauncher.Instance != null))
+                ApplicationLauncher.Instance.RemoveModApplication(appLauncherButton);
+            if (toolbarButton != null) toolbarButton.Enabled = showButton;
+        }
+
+        void ResetButtonState(Vessel v, bool state)
+        {
+            Core.Log("ResetButtonState('" + v.vesselName + "', " + state + ")");
+            if (v.isActiveVessel) ResetButtonState();
         }
 
         bool active;
