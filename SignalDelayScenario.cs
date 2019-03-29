@@ -29,7 +29,11 @@ namespace SignalDelay
                 toolbarButton.ToolTip = "Switch Signal Delay";
                 toolbarButton.OnClick += (e) => { ToggleMod(); };
             }
-            icon.LoadImage(File.ReadAllBytes(System.IO.Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
+            if (SignalDelaySettings.AppLauncherButton)
+            {
+                icon.LoadImage(File.ReadAllBytes(System.IO.Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
+                appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
+            }
             ResetButtonState();
         }
 
@@ -158,12 +162,13 @@ namespace SignalDelay
         /// </summary>
         void ResetButtonState()
         {
-            Core.Log("IsConnected = " + IsConnected + "; IsProbe = " + IsProbe + ", AppLauncher button is " + (appLauncherButton == null ? "" : "not ") + "null; Toolbar button is " + (toolbarButton == null ? "" : "not ") + "null.");
+            Core.Log("IsConnected = " + IsConnected + "; ControlState = " + Vessel.Connection.ControlState + ", AppLauncher button is " + (appLauncherButton == null ? "" : "not ") + "null; Toolbar button is " + (toolbarButton == null ? "" : "not ") + "null.", Core.LogLevel.Important);
             bool showButton = IsConnected && IsProbe;
-            if (showButton && SignalDelaySettings.AppLauncherButton && (appLauncherButton == null))
-                appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
-            else if ((appLauncherButton != null) && (ApplicationLauncher.Instance != null))
-                ApplicationLauncher.Instance.RemoveModApplication(appLauncherButton);
+            if (appLauncherButton != null)
+            {
+                Core.Log((showButton ? "Showing" : "Hiding") + " AppLauncher button...", Core.LogLevel.Important);
+                appLauncherButton.VisibleInScenes = showButton ? ApplicationLauncher.AppScenes.FLIGHT : ApplicationLauncher.AppScenes.NEVER;
+            }
             if (toolbarButton != null) toolbarButton.Enabled = showButton;
         }
 
@@ -206,7 +211,7 @@ namespace SignalDelay
         }
 
         public bool IsConnected => Vessel?.Connection?.IsConnected ?? false;
-        public bool IsProbe => (Vessel.Connection.ControlState & VesselControlState.Probe) != 0;
+        public bool IsProbe => ((Vessel.Connection.ControlState & VesselControlState.Probe) != 0) && !Vessel.isEVA;
 
         /// <summary>
         /// Checks whether signal delay should be applied to the active vessel
