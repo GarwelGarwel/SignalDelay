@@ -65,6 +65,7 @@
     <None Include="GameData\SignalDelay\Patches\ReStockPlus.cfg" />
     <None Include="GameData\SignalDelay\Patches\RTRA.cfg" />
     <None Include="GameData\SignalDelay\Patches\SEP.cfg" />
+    <None Include="GameData\SignalDelay\Patches\WBI.cfg" />
     <None Include="README.md" />
     <None Include="GameData\SignalDelay\SignalDelay.version" />
   </ItemGroup>
