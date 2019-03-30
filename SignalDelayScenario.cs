@@ -16,10 +16,6 @@ namespace SignalDelay
 
         public void Start()
         {
-            GameEvents.onVesselSwitching.Add(OnVesselSwitching);
-            GameEvents.CommNet.OnCommStatusChange.Add(ResetButtonState);
-
-            // Setup Blizzy's Toolbar button
             if (ToolbarManager.ToolbarAvailable)
             {
                 Core.Log("Registering Blizzy's Toolbar button...", Core.LogLevel.Important);
@@ -35,6 +31,9 @@ namespace SignalDelay
                 appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
             }
             ResetButtonState();
+
+            GameEvents.onVesselSwitching.Add(OnVesselSwitching);
+            GameEvents.CommNet.OnCommStatusChange.Add(ResetButtonState);
         }
 
         public void OnDisable()
