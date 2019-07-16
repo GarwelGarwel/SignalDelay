@@ -26,6 +26,7 @@ namespace SignalDelay
             resourceId = PartResourceLibrary.Instance.GetDefinition("ElectricCharge").id;
             deployableAntenna = part.FindModuleImplementing<ModuleDeployableAntenna>();
             lastUpdated = Planetarium.GetUniversalTime();
+            if (HighLogic.LoadedSceneIsEditor) actualECRate = ecRate;
         }
 
         double ConsumptionRate => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.ControlPath.First.signalStrength * (1 - SignalDelaySettings.ECBonus)) : 1);
