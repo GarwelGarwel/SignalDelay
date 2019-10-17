@@ -22,6 +22,7 @@ The mod is in beta. Please report bugs via the GitHub [Issues tab](https://githu
 - [Global Construction](https://forum.kerbalspaceprogram.com/index.php?/topic/154167-145-global-construction/)
 - [JX2Antenna](https://github.com/KSPSnark/JX2Antenna)
 - [kOS](https://github.com/KSP-KOS/KOS) - terminal is supported, but all the commands are implemented without delay. You may use WAIT command to simulate delay.
+- [Probes Before Crew](https://forum.kerbalspaceprogram.com/index.php?/topic/181013-16-probes-before-crew-pbc/)
 - [Pathfinder (WBI)](https://forum.kerbalspaceprogram.com/index.php?/topic/121397-16x-pathfinder-space-camping-geoscience/)
 - [RemoteTech Redev Antennas](https://forum.kerbalspaceprogram.com/index.php?/topic/139167-144-remotetech-v1812-2018-07-17/)
 - [ReStock+](https://forum.kerbalspaceprogram.com/index.php?/topic/182679-161-restock-revamping-ksps-art/)
