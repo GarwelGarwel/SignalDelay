@@ -87,10 +87,10 @@ namespace SignalDelay
                     SignalDelayScenario.FlightCtrlState.mainThrottle = 1;
                     break;
                 case CommandType.THROTTLE_DOWN:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle -= 0.01f * SignalDelaySettings.ThrottleSensitivity;
+                    SignalDelayScenario.FlightCtrlState.mainThrottle = Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - 0.01f * SignalDelaySettings.ThrottleSensitivity. 0);
                     break;
                 case CommandType.THROTTLE_UP:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle += 0.01f * SignalDelaySettings.ThrottleSensitivity;
+                    SignalDelayScenario.FlightCtrlState.mainThrottle = Math.Min(SignalDelayScenario.FlightCtrlState.mainThrottle + 0.01f * SignalDelaySettings.ThrottleSensitivity, 1);
                     break;
                 case CommandType.WHEEL_STEER_LEFT:
                     SignalDelayScenario.FlightCtrlState.wheelSteer = 1;
