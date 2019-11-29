@@ -200,6 +200,8 @@ namespace SignalDelay
                 {
                     Vessel.OnFlyByWire -= OnFlyByWire;
                     InputLockManager.RemoveControlLock("this");
+                    Core.Log("Deactivating signal delay. Setting main throttle to " + FlightCtrlState.mainThrottle + " (was " + Vessel.ctrlState.mainThrottle + ").");
+                    Vessel.ctrlState.mainThrottle = FlightCtrlState.mainThrottle;
                     if (SignalDelaySettings.DebugMode) Core.ShowNotification("Signal delay deactivated.");
                 }
             }
