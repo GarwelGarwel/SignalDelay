@@ -71,6 +71,7 @@
     <None Include="GameData\SignalDelay\Patches\GC.cfg" />
     <None Include="GameData\SignalDelay\Patches\JX2.cfg" />
     <None Include="GameData\SignalDelay\Patches\MKS.cfg" />
+    <None Include="GameData\SignalDelay\Patches\NFX.cfg" />
     <None Include="GameData\SignalDelay\Patches\ReStockPlus.cfg" />
     <None Include="GameData\SignalDelay\Patches\RTRA.cfg" />
     <None Include="GameData\SignalDelay\Patches\SEP.cfg" />
