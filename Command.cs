@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SignalDelay
 {
@@ -87,7 +85,7 @@ namespace SignalDelay
                     SignalDelayScenario.FlightCtrlState.mainThrottle = 1;
                     break;
                 case CommandType.THROTTLE_DOWN:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle = Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - 0.01f * SignalDelaySettings.ThrottleSensitivity. 0);
+                    SignalDelayScenario.FlightCtrlState.mainThrottle = Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - 0.01f * SignalDelaySettings.ThrottleSensitivity, 0);
                     break;
                 case CommandType.THROTTLE_UP:
                     SignalDelayScenario.FlightCtrlState.mainThrottle = Math.Min(SignalDelayScenario.FlightCtrlState.mainThrottle + 0.01f * SignalDelaySettings.ThrottleSensitivity, 1);
