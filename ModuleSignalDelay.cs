@@ -13,11 +13,14 @@ namespace SignalDelay
         double lastUpdated;
         int resourceId;
 
-        public List<PartResourceDefinition> GetConsumedResources() => new List<PartResourceDefinition>() { PartResourceLibrary.Instance.GetDefinition("ElectricCharge") };
-
         ModuleDeployableAntenna deployableAntenna;
 
-        bool IsActive => SignalDelaySettings.IsECUsageEnabled && ((deployableAntenna == null) || (deployableAntenna.deployState == ModuleDeployablePart.DeployState.EXTENDED));
+        bool IsActive => SignalDelaySettings.Instance.ECUsage && ((deployableAntenna == null) || (deployableAntenna.deployState == ModuleDeployablePart.DeployState.EXTENDED));
+
+        double ConsumptionRate
+            => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.ControlPath.First.signalStrength * (1 - SignalDelaySettings.Instance.ECBonus)) : 1);
+
+        public List<PartResourceDefinition> GetConsumedResources() => new List<PartResourceDefinition>() { PartResourceLibrary.Instance.GetDefinition("ElectricCharge") };
 
         public override void OnStart(StartState state)
         {
@@ -28,12 +31,11 @@ namespace SignalDelay
             lastUpdated = Planetarium.GetUniversalTime();
         }
 
-        double ConsumptionRate => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.ControlPath.First.signalStrength * (1 - SignalDelaySettings.ECBonus)) : 1);
-
         public void FixedUpdate()
         {
             double time = Planetarium.GetUniversalTime();
-            if (time <= lastUpdated) return;
+            if (time <= lastUpdated)
+                return;
             if (IsActive)
             {
                 actualECRate = (float)ConsumptionRate;

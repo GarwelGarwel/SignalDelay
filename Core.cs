@@ -3,12 +3,28 @@ using UnityEngine;
 
 namespace SignalDelay
 {
-    class Core
+    /// <summary>
+    /// Log levels:
+    /// <list type="bullet">
+    /// <item><definition>None: do not log</definition></item>
+    /// <item><definition>Error: log only errors</definition></item>
+    /// <item><definition>Important: log only errors and important information</definition></item>
+    /// <item><definition>Debug: log all information</definition></item>
+    /// </list>
+    /// </summary>
+    internal enum LogLevel { None = 0, Error, Important, Debug };
+
+    static class Core
     {
         /// <summary>
         /// Returns effective light speed for signal delay calculation (half the speed if round trip is enabled)
         /// </summary>
-        public static double LightSpeed => SignalDelaySettings.LightSpeed / (SignalDelaySettings.RoundTrip ? 2 : 1);
+        public static double LightSpeed => SignalDelaySettings.Instance.LightSpeed / (SignalDelaySettings.Instance.Roundtrip ? 2 : 1);
+
+        /// <summary>
+        /// Current <see cref="LogLevel"/>: either Debug or Important
+        /// </summary>
+        public static LogLevel Level => SignalDelaySettings.Instance.DebugMode ? LogLevel.Debug : LogLevel.Important;
 
         /// <summary>
         /// Formats time as a string, e.g. 876 d 5 h 43 m 21.09 s
@@ -53,7 +69,7 @@ namespace SignalDelay
         /// <param name="key">Key of the value</param>
         /// <param name="defaultValue">Value to return if the key is not found/in invalid format</param>
         /// <returns></returns>
-        public static double GetDouble(ConfigNode node, string key, double defaultValue = 0)
+        public static double GetDouble(this ConfigNode node, string key, double defaultValue = 0)
         {
             double res = 0;
             return node.TryGetValue(key, ref res) ? res : defaultValue;
@@ -68,15 +84,24 @@ namespace SignalDelay
         public static string FCSToString(FlightCtrlState flightCtrlState, string title = "")
         {
             string res = "";
-            if (flightCtrlState.pitch != 0) res += "Pitch: " + flightCtrlState.pitch + "   ";
-            if (flightCtrlState.pitchTrim != 0) res += "Pitch Trim: " + flightCtrlState.pitchTrim + "   ";
-            if (flightCtrlState.yaw != 0) res += "Yaw: " + flightCtrlState.yaw + "   ";
-            if (flightCtrlState.yawTrim != 0) res += "Yaw Trim: " + flightCtrlState.yawTrim + "   ";
-            if (flightCtrlState.roll != 0) res += "Roll: " + flightCtrlState.roll + "   ";
-            if (flightCtrlState.rollTrim != 0) res += "Roll Trim: " + flightCtrlState.rollTrim + "   ";
-            if (flightCtrlState.mainThrottle != 0) res += "Throttle: " + flightCtrlState.mainThrottle;
-            if (flightCtrlState.wheelSteer != 0) res += "Wheel Steer: " + flightCtrlState.wheelSteer + "   ";
-            if (flightCtrlState.wheelThrottle != 0) res += "Wheel Throttle: " + flightCtrlState.wheelThrottle + "   ";
+            if (flightCtrlState.pitch != 0)
+                res += "Pitch: " + flightCtrlState.pitch + "   ";
+            if (flightCtrlState.pitchTrim != 0)
+                res += "Pitch Trim: " + flightCtrlState.pitchTrim + "   ";
+            if (flightCtrlState.yaw != 0)
+                res += "Yaw: " + flightCtrlState.yaw + "   ";
+            if (flightCtrlState.yawTrim != 0)
+                res += "Yaw Trim: " + flightCtrlState.yawTrim + "   ";
+            if (flightCtrlState.roll != 0)
+                res += "Roll: " + flightCtrlState.roll + "   ";
+            if (flightCtrlState.rollTrim != 0)
+                res += "Roll Trim: " + flightCtrlState.rollTrim + "   ";
+            if (flightCtrlState.mainThrottle != 0)
+                res += "Throttle: " + flightCtrlState.mainThrottle;
+            if (flightCtrlState.wheelSteer != 0)
+                res += "Wheel Steer: " + flightCtrlState.wheelSteer + "   ";
+            if (flightCtrlState.wheelThrottle != 0)
+                res += "Wheel Throttle: " + flightCtrlState.wheelThrottle + "   ";
             return (((title != "") && (res != "")) ? title + ": " : "") + res;
         }
 
@@ -85,22 +110,6 @@ namespace SignalDelay
         /// </summary>
         /// <param name="msg"></param>
         public static void ShowNotification(string msg) => ScreenMessages.PostScreenMessage(msg);
-
-        /// <summary>
-        /// Log levels:
-        /// <list type="bullet">
-        /// <item><definition>None: do not log</definition></item>
-        /// <item><definition>Error: log only errors</definition></item>
-        /// <item><definition>Important: log only errors and important information</definition></item>
-        /// <item><definition>Debug: log all information</definition></item>
-        /// </list>
-        /// </summary>
-        public enum LogLevel { None, Error, Important, Debug };
-
-        /// <summary>
-        /// Current <see cref="LogLevel"/>: either Debug or Important
-        /// </summary>
-        public static LogLevel Level => SignalDelaySettings.DebugMode ? LogLevel.Debug : LogLevel.Important;
 
         /// <summary>
         /// Returns true if message with the given level should be logged under current settings
@@ -115,6 +124,9 @@ namespace SignalDelay
         /// <param name="message">Text to log</param>
         /// <param name="messageLevel"><see cref="LogLevel"/> of the entry</param>
         public static void Log(string message, LogLevel messageLevel = LogLevel.Debug)
-        { if (IsLogging(messageLevel) && (message != "")) Debug.Log("[SignalDelay] " + (messageLevel == LogLevel.Error ? "ERROR: " : "") + message); }
+        {
+            if (IsLogging(messageLevel) && (message != ""))
+                Debug.Log("[SignalDelay] " + (messageLevel == LogLevel.Error ? "ERROR: " : "") + message);
+        }
     }
 }
