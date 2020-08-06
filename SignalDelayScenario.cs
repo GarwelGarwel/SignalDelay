@@ -46,7 +46,7 @@ namespace SignalDelay
             GameEvents.CommNet.OnCommStatusChange.Remove(ResetButtonState);
             if (toolbarButton != null)
                 toolbarButton.Destroy();
-            if ((appLauncherButton != null) && (ApplicationLauncher.Instance != null))
+            if (appLauncherButton != null && ApplicationLauncher.Instance != null)
                 ApplicationLauncher.Instance.RemoveModApplication(appLauncherButton);
             Active = false;
         }
@@ -168,7 +168,8 @@ namespace SignalDelay
             CheckVessel();
             if (!Active)
                 return;
-            Core.Log(Core.FCSToString(Vessel.ctrlState, "Vessel FCS"));
+            if (Core.IsLogging())
+                Core.Log(Core.FCSToString(Vessel.ctrlState, "Vessel FCS"));
             delayRecalculated = false;
 
             FlightCtrlState.pitch = FlightCtrlState.yaw = FlightCtrlState.roll = 0;
@@ -348,6 +349,7 @@ namespace SignalDelay
             {
                 if (Core.IsLogging())
                     Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
+
                 if (Vessel.Autopilot.Enabled && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
                 {
                     Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.");
@@ -382,12 +384,8 @@ namespace SignalDelay
             {
                 Core.Log("Cannot access control path for " + Vessel?.vesselName + ", delay set to 0.", LogLevel.Error);
                 Delay = 0;
-                return;
             }
-            double dist = 0;
-            foreach (CommLink l in Vessel.Connection.ControlPath)
-                dist += Vector3d.Distance(l.a.position, l.b.position);
-            Delay = dist / Core.LightSpeed;
+            else Delay = Vessel.Connection.ControlPath.Sum(link => Vector3d.Distance(link.a.position, link.b.position)) / Core.LightSpeed;
         }
 
         #endregion VESSEL METHODS

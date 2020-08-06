@@ -45,20 +45,21 @@ namespace SignalDelay
                 res += d + " d ";
                 show0 = true;
             }
-            if ((t >= 3600) || show0)
+            if (show0 || t >= 3600)
             {
                 h = (int)Math.Floor(t / 3600);
                 t -= h * 3600;
                 res += h + " h ";
                 show0 = true;
             }
-            if ((t >= 60) || show0)
+            if (show0 || t >= 60)
             {
                 m = (int)Math.Floor(t / 60);
                 t -= m * 60;
                 res += m + " m ";
             }
-            if ((time < 1) || (Math.Round(t, digits) > 0)) res += t.ToString("F" + digits) + " s";
+            if (time < 1 || Math.Round(t, digits) > 0)
+                res += t.ToString("F" + digits) + " s";
             return res;
         }
 
@@ -125,7 +126,7 @@ namespace SignalDelay
         /// <param name="messageLevel"><see cref="LogLevel"/> of the entry</param>
         public static void Log(string message, LogLevel messageLevel = LogLevel.Debug)
         {
-            if (IsLogging(messageLevel) && (message != ""))
+            if (IsLogging(messageLevel) && message.Length != 0)
                 Debug.Log("[SignalDelay] " + (messageLevel == LogLevel.Error ? "ERROR: " : "") + message);
         }
     }

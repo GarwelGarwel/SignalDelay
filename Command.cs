@@ -123,11 +123,13 @@ namespace SignalDelay
                     break;
 
                 case CommandType.THROTTLE_DOWN:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle = Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 0);
+                    SignalDelayScenario.FlightCtrlState.mainThrottle =
+                        Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 0);
                     break;
 
                 case CommandType.THROTTLE_UP:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle = Math.Min(SignalDelayScenario.FlightCtrlState.mainThrottle + 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 1);
+                    SignalDelayScenario.FlightCtrlState.mainThrottle =
+                        Math.Min(SignalDelayScenario.FlightCtrlState.mainThrottle + 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 1);
                     break;
 
                 case CommandType.WHEEL_STEER_LEFT:
@@ -167,8 +169,8 @@ namespace SignalDelay
                     break;
 
                 case CommandType.SAS_CHANGE_MODE:
-                    if ((Params.Count > 0) && (Params[0] is VesselAutopilot.AutopilotMode) && v.Autopilot.CanSetMode((VesselAutopilot.AutopilotMode)Params[0]))
-                        v.Autopilot.SetMode((VesselAutopilot.AutopilotMode)Params[0]);
+                    if ((Params.Count > 0) && (Params[0] is VesselAutopilot.AutopilotMode mode) && v.Autopilot.CanSetMode(mode))
+                        v.Autopilot.SetMode(mode);
                     break;
 
                 case CommandType.ABORT:
