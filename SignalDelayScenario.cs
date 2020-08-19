@@ -259,7 +259,6 @@ namespace SignalDelay
         /// </summary>
         void ResetButtonState()
         {
-            Core.Log("IsConnected = " + IsConnected + "; ControlState = " + Vessel.Connection.ControlState, LogLevel.Important);
             bool showButton = IsConnected && IsProbe;
             if (appLauncherButton != null)
                 appLauncherButton.VisibleInScenes = showButton ? ApplicationLauncher.AppScenes.FLIGHT : ApplicationLauncher.AppScenes.NEVER;
