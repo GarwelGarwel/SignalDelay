@@ -20,21 +20,21 @@ namespace SignalDelay
                 foreach (Command c in this)
                     node.AddNode(c.ConfigNode);
                 if (node.CountNodes > 0)
-                    Core.Log(node.CountNodes + " commands saved.");
+                    Core.Log($"{node.CountNodes} commands saved.");
                 return node;
             }
             set
             {
                 foreach (ConfigNode n in value.GetNodes("Command"))
                     Enqueue(new Command(n));
-                Core.Log(value.GetNodes("Command").Length + " commands loaded.");
+                Core.Log($"{value.GetNodes("Command").Length} commands loaded.");
             }
         }
 
         public new Command Dequeue()
         {
             Command res = base.Dequeue();
-            Core.Log("Executing command " + res + ".");
+            Core.Log($"Executing command {res}.");
             if (TimeWarp.CurrentRate > TimeWarp.MaxPhysicsRate)
                 TimeWarp.SetRate(0, true);
             res.Execute();

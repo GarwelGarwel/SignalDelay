@@ -74,7 +74,7 @@ namespace SignalDelay
                 try { Type = (CommandType)Enum.Parse(typeof(CommandType), value.GetValue("type")); }
                 catch (Exception)
                 {
-                    Core.Log("Could not parse command type for this command: " + value, LogLevel.Error);
+                    Core.Log($"Could not parse command type for this command: {value}", LogLevel.Error);
                     Type = CommandType.NONE;
                 }
                 Time = value.GetDouble("time");
@@ -218,11 +218,11 @@ namespace SignalDelay
                     break;
 
                 default:
-                    Core.Log("Unimplemented command " + Type, LogLevel.Error);
+                    Core.Log($"Unimplemented command {Type}.", LogLevel.Error);
                     break;
             }
         }
 
-        public override string ToString() => Type + " @ " + Time;
+        public override string ToString() => $"{Type} @ {Time}";
     }
 }

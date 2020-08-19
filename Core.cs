@@ -42,24 +42,24 @@ namespace SignalDelay
             {
                 d = (int)Math.Floor(t / KSPUtil.dateTimeFormatter.Day);
                 t -= d * KSPUtil.dateTimeFormatter.Day;
-                res += d + " d ";
+                res += $"{d} d ";
                 show0 = true;
             }
             if (show0 || t >= 3600)
             {
                 h = (int)Math.Floor(t / 3600);
                 t -= h * 3600;
-                res += h + " h ";
+                res += $"{h} h ";
                 show0 = true;
             }
             if (show0 || t >= 60)
             {
                 m = (int)Math.Floor(t / 60);
                 t -= m * 60;
-                res += m + " m ";
+                res += $"{m} m ";
             }
             if (time < 1 || Math.Round(t, digits) > 0)
-                res += t.ToString("F" + digits) + " s";
+                res += $"{t.ToString($"F{digits}")} s";
             return res;
         }
 
@@ -86,23 +86,23 @@ namespace SignalDelay
         {
             string res = "";
             if (flightCtrlState.pitch != 0)
-                res += "Pitch: " + flightCtrlState.pitch + "   ";
+                res += $"Pitch: {flightCtrlState.pitch}   ";
             if (flightCtrlState.pitchTrim != 0)
-                res += "Pitch Trim: " + flightCtrlState.pitchTrim + "   ";
+                res += $"Pitch Trim: {flightCtrlState.pitchTrim}   ";
             if (flightCtrlState.yaw != 0)
-                res += "Yaw: " + flightCtrlState.yaw + "   ";
+                res += $"Yaw: {flightCtrlState.yaw}   ";
             if (flightCtrlState.yawTrim != 0)
-                res += "Yaw Trim: " + flightCtrlState.yawTrim + "   ";
+                res += $"Yaw Trim: {flightCtrlState.yawTrim}   ";
             if (flightCtrlState.roll != 0)
-                res += "Roll: " + flightCtrlState.roll + "   ";
+                res += $"Roll: {flightCtrlState.roll}   ";
             if (flightCtrlState.rollTrim != 0)
-                res += "Roll Trim: " + flightCtrlState.rollTrim + "   ";
+                res += $"Roll Trim: {flightCtrlState.rollTrim}   ";
             if (flightCtrlState.mainThrottle != 0)
-                res += "Throttle: " + flightCtrlState.mainThrottle;
+                res += $"Throttle: {flightCtrlState.mainThrottle}";
             if (flightCtrlState.wheelSteer != 0)
-                res += "Wheel Steer: " + flightCtrlState.wheelSteer + "   ";
+                res += $"Wheel Steer: {flightCtrlState.wheelSteer}   ";
             if (flightCtrlState.wheelThrottle != 0)
-                res += "Wheel Throttle: " + flightCtrlState.wheelThrottle + "   ";
+                res += $"Wheel Throttle: {flightCtrlState.wheelThrottle}   ";
             return (((title != "") && (res != "")) ? title + ": " : "") + res;
         }
 
@@ -127,7 +127,11 @@ namespace SignalDelay
         public static void Log(string message, LogLevel messageLevel = LogLevel.Debug)
         {
             if (IsLogging(messageLevel) && message.Length != 0)
-                Debug.Log("[SignalDelay] " + (messageLevel == LogLevel.Error ? "ERROR: " : "") + message);
+            {
+                if (messageLevel == LogLevel.Error)
+                    message = $"ERROR: {message}";
+                Debug.Log($"[SignalDelay] {message}");
+            }
         }
     }
 }

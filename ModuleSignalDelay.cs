@@ -39,7 +39,7 @@ namespace SignalDelay
                 availableResources.TryGetValue("ElectricCharge", out double ec);
                 module.actualECRate = (float)module.ConsumptionRate;
                 resourceChangeRequest.Add(new KeyValuePair<string, double>("ElectricCharge", -module.actualECRate));
-                Core.Log(v.vesselName + " " + part_snapshot.partName + ": consuming " + module.ConsumptionRate + " EC/sec in background (" + ec + " EC available)");
+                Core.Log($"{v.vesselName} {part_snapshot.partName}: consuming {module.ConsumptionRate:N2} EC/sec in background ({ec} EC available).");
             }
             else module.actualECRate = 0;
             module.lastUpdated = Planetarium.GetUniversalTime();
@@ -49,7 +49,7 @@ namespace SignalDelay
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
-            Core.Log("OnStart(" + state + ") in part " + part.name);
+            Core.Log($"OnStart({state}) in part {part.name}");
             resourceId = PartResourceLibrary.Instance.GetDefinition("ElectricCharge").id;
             deployableAntenna = part.FindModuleImplementing<ModuleDeployableAntenna>();
             lastUpdated = Planetarium.GetUniversalTime();
@@ -69,6 +69,6 @@ namespace SignalDelay
             lastUpdated = time;
         }
 
-        public override string GetInfo() => "Background EC Usage: up to " + ecRate + "/sec";
+        public override string GetInfo() => $"Background EC Usage: up to {ecRate}/sec";
     }
 }

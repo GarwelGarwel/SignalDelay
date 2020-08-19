@@ -226,7 +226,7 @@ namespace SignalDelay
                     Vessel.OnFlyByWire += OnFlyByWire;
                     FlightCtrlState = new FlightCtrlState()
                     { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
-                    Core.Log("Cached throttle = " + throttleCache);
+                    Core.Log($"Cached throttle = {throttleCache}");
                     sasMode = Vessel.Autopilot.Mode;
                     InputLockManager.SetControlLock(SignalDelaySettings.Instance.HidePartActions ? ControlTypes.ALL_SHIP_CONTROLS : ControlTypes.ALL_SHIP_CONTROLS & ~(ControlTypes.ACTIONS_ALL | ControlTypes.TWEAKABLES | ControlTypes.LINEAR), "this");
                     if (Core.IsLogging())
@@ -236,7 +236,7 @@ namespace SignalDelay
                 {
                     Vessel.OnFlyByWire -= OnFlyByWire;
                     InputLockManager.RemoveControlLock("this");
-                    Core.Log("Deactivating signal delay. Setting main throttle to " + FlightCtrlState.mainThrottle + " (was " + Vessel.ctrlState.mainThrottle + ").");
+                    Core.Log($"Deactivating signal delay. Setting main throttle to {FlightCtrlState.mainThrottle} (was {Vessel.ctrlState.mainThrottle}).");
                     Vessel.ctrlState.mainThrottle = FlightCtrlState.mainThrottle;
                     if (Core.IsLogging())
                         Core.ShowNotification("Signal delay deactivated.");
@@ -268,7 +268,7 @@ namespace SignalDelay
 
         void ResetButtonState(Vessel v, bool state)
         {
-            Core.Log("ResetButtonState('" + v.vesselName + "', " + state + ")");
+            Core.Log($"ResetButtonState('{v.vesselName}', {state})");
             if (v.isActiveVessel)
                 ResetButtonState();
         }
@@ -369,7 +369,7 @@ namespace SignalDelay
                     fcs.mainThrottle = FlightCtrlState.mainThrottle;
                 else
                 {
-                    Core.Log("Throttle has been changed from " + throttleCache + " to " + fcs.mainThrottle + " by another mod.");
+                    Core.Log($"Throttle has been changed from {throttleCache} to {fcs.mainThrottle} by another mod.");
                     FlightCtrlState.mainThrottle = throttleCache = fcs.mainThrottle;
                 }
                 fcs.wheelSteer = FlightCtrlState.wheelSteer;
@@ -381,7 +381,7 @@ namespace SignalDelay
         {
             if (Vessel?.Connection?.ControlPath == null)
             {
-                Core.Log("Cannot access control path for " + Vessel?.vesselName + ", delay set to 0.", LogLevel.Error);
+                Core.Log($"Cannot access control path for {Vessel?.vesselName}, delay set to 0.", LogLevel.Error);
                 Delay = 0;
             }
             else Delay = Vessel.Connection.ControlPath.Sum(link => Vector3d.Distance(link.a.position, link.b.position)) / Core.LightSpeed;
