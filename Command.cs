@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SignalDelay
 {
@@ -50,117 +48,17 @@ namespace SignalDelay
 
     public class Command
     {
+        public Command(CommandType type, double time)
+        {
+            Type = type;
+            Time = time;
+        }
+
+        public Command(ConfigNode node) => ConfigNode = node;
+
         public CommandType Type { get; set; }
         public double Time { get; set; }
         public List<object> Params { get; set; } = new List<object>();
-
-        public void Execute()
-        {
-            Vessel v = FlightGlobals.ActiveVessel;
-            switch (Type)
-            {
-                case CommandType.LAUNCH_STAGES:
-                    KSP.UI.Screens.StageManager.ActivateNextStage();
-                    break;
-                case CommandType.PITCH_DOWN:
-                    SignalDelayScenario.FlightCtrlState.pitch = -1;
-                    break;
-                case CommandType.PITCH_UP:
-                    SignalDelayScenario.FlightCtrlState.pitch = 1;
-                    break;
-                case CommandType.YAW_LEFT:
-                    SignalDelayScenario.FlightCtrlState.yaw = -1;
-                    break;
-                case CommandType.YAW_RIGHT:
-                    SignalDelayScenario.FlightCtrlState.yaw = 1;
-                    break;
-                case CommandType.ROLL_LEFT:
-                    SignalDelayScenario.FlightCtrlState.roll = -1;
-                    break;
-                case CommandType.ROLL_RIGHT:
-                    SignalDelayScenario.FlightCtrlState.roll = 1;
-                    break;
-                case CommandType.THROTTLE_CUTOFF:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle = 0;
-                    break;
-                case CommandType.THROTTLE_FULL:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle = 1;
-                    break;
-                case CommandType.THROTTLE_DOWN:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle -= 0.01f * SignalDelaySettings.ThrottleSensitivity;
-                    break;
-                case CommandType.THROTTLE_UP:
-                    SignalDelayScenario.FlightCtrlState.mainThrottle += 0.01f * SignalDelaySettings.ThrottleSensitivity;
-                    break;
-                case CommandType.WHEEL_STEER_LEFT:
-                    SignalDelayScenario.FlightCtrlState.wheelSteer = 1;
-                    break;
-                case CommandType.WHEEL_STEER_RIGHT:
-                    SignalDelayScenario.FlightCtrlState.wheelSteer = -1;
-                    break;
-                case CommandType.WHEEL_THROTTLE_DOWN:
-                    SignalDelayScenario.FlightCtrlState.wheelThrottle = -1;
-                    break;
-                case CommandType.WHEEL_THROTTLE_UP:
-                    SignalDelayScenario.FlightCtrlState.wheelThrottle = 1;
-                    break;
-                case CommandType.LIGHT_TOGGLE:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Light);
-                    break;
-                case CommandType.LANDING_GEAR:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Gear);
-                    break;
-                case CommandType.BRAKES:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Brakes);
-                    break;
-                case CommandType.RCS_TOGGLE:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.RCS);
-                    break;
-                case CommandType.SAS_TOGGLE:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.SAS);
-                    break;
-                case CommandType.SAS_CHANGE_MODE:
-                    if ((Params.Count > 0) && (Params[0] is VesselAutopilot.AutopilotMode) && v.Autopilot.CanSetMode((VesselAutopilot.AutopilotMode)Params[0]))
-                        v.Autopilot.SetMode((VesselAutopilot.AutopilotMode)Params[0]);
-                    break;
-                case CommandType.ABORT:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Abort);
-                    break;
-                case CommandType.ACTIONGROUP1:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom01);
-                    break;
-                case CommandType.ACTIONGROUP2:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom02);
-                    break;
-                case CommandType.ACTIONGROUP3:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom03);
-                    break;
-                case CommandType.ACTIONGROUP4:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom04);
-                    break;
-                case CommandType.ACTIONGROUP5:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom05);
-                    break;
-                case CommandType.ACTIONGROUP6:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom06);
-                    break;
-                case CommandType.ACTIONGROUP7:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom07);
-                    break;
-                case CommandType.ACTIONGROUP8:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom08);
-                    break;
-                case CommandType.ACTIONGROUP9:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom09);
-                    break;
-                case CommandType.ACTIONGROUP10:
-                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom10);
-                    break;
-                default:
-                    Core.Log("Unimplemented command " + Type, Core.LogLevel.Error);
-                    break;
-            }
-        }
 
         public ConfigNode ConfigNode
         {
@@ -176,21 +74,155 @@ namespace SignalDelay
                 try { Type = (CommandType)Enum.Parse(typeof(CommandType), value.GetValue("type")); }
                 catch (Exception)
                 {
-                    Core.Log("Could not parse command type for this command: " + value, Core.LogLevel.Error);
+                    Core.Log($"Could not parse command type for this command: {value}", LogLevel.Error);
                     Type = CommandType.NONE;
                 }
-                Time = Core.GetDouble(value, "time");
+                Time = value.GetDouble("time");
             }
         }
 
-        public override string ToString() => Type + " @ " + Time;
-
-        public Command(CommandType type, double time)
+        public void Execute()
         {
-            Type = type;
-            Time = time;
+            Vessel v = FlightGlobals.ActiveVessel;
+            switch (Type)
+            {
+                case CommandType.LAUNCH_STAGES:
+                    KSP.UI.Screens.StageManager.ActivateNextStage();
+                    break;
+
+                case CommandType.PITCH_DOWN:
+                    SignalDelayScenario.FlightCtrlState.pitch = -1;
+                    break;
+
+                case CommandType.PITCH_UP:
+                    SignalDelayScenario.FlightCtrlState.pitch = 1;
+                    break;
+
+                case CommandType.YAW_LEFT:
+                    SignalDelayScenario.FlightCtrlState.yaw = -1;
+                    break;
+
+                case CommandType.YAW_RIGHT:
+                    SignalDelayScenario.FlightCtrlState.yaw = 1;
+                    break;
+
+                case CommandType.ROLL_LEFT:
+                    SignalDelayScenario.FlightCtrlState.roll = -1;
+                    break;
+
+                case CommandType.ROLL_RIGHT:
+                    SignalDelayScenario.FlightCtrlState.roll = 1;
+                    break;
+
+                case CommandType.THROTTLE_CUTOFF:
+                    SignalDelayScenario.FlightCtrlState.mainThrottle = 0;
+                    break;
+
+                case CommandType.THROTTLE_FULL:
+                    SignalDelayScenario.FlightCtrlState.mainThrottle = 1;
+                    break;
+
+                case CommandType.THROTTLE_DOWN:
+                    SignalDelayScenario.FlightCtrlState.mainThrottle =
+                        Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 0);
+                    break;
+
+                case CommandType.THROTTLE_UP:
+                    SignalDelayScenario.FlightCtrlState.mainThrottle =
+                        Math.Min(SignalDelayScenario.FlightCtrlState.mainThrottle + 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 1);
+                    break;
+
+                case CommandType.WHEEL_STEER_LEFT:
+                    SignalDelayScenario.FlightCtrlState.wheelSteer = 1;
+                    break;
+
+                case CommandType.WHEEL_STEER_RIGHT:
+                    SignalDelayScenario.FlightCtrlState.wheelSteer = -1;
+                    break;
+
+                case CommandType.WHEEL_THROTTLE_DOWN:
+                    SignalDelayScenario.FlightCtrlState.wheelThrottle = -1;
+                    break;
+
+                case CommandType.WHEEL_THROTTLE_UP:
+                    SignalDelayScenario.FlightCtrlState.wheelThrottle = 1;
+                    break;
+
+                case CommandType.LIGHT_TOGGLE:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Light);
+                    break;
+
+                case CommandType.LANDING_GEAR:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Gear);
+                    break;
+
+                case CommandType.BRAKES:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Brakes);
+                    break;
+
+                case CommandType.RCS_TOGGLE:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.RCS);
+                    break;
+
+                case CommandType.SAS_TOGGLE:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.SAS);
+                    break;
+
+                case CommandType.SAS_CHANGE_MODE:
+                    if ((Params.Count > 0) && (Params[0] is VesselAutopilot.AutopilotMode mode) && v.Autopilot.CanSetMode(mode))
+                        v.Autopilot.SetMode(mode);
+                    break;
+
+                case CommandType.ABORT:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Abort);
+                    break;
+
+                case CommandType.ACTIONGROUP1:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom01);
+                    break;
+
+                case CommandType.ACTIONGROUP2:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom02);
+                    break;
+
+                case CommandType.ACTIONGROUP3:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom03);
+                    break;
+
+                case CommandType.ACTIONGROUP4:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom04);
+                    break;
+
+                case CommandType.ACTIONGROUP5:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom05);
+                    break;
+
+                case CommandType.ACTIONGROUP6:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom06);
+                    break;
+
+                case CommandType.ACTIONGROUP7:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom07);
+                    break;
+
+                case CommandType.ACTIONGROUP8:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom08);
+                    break;
+
+                case CommandType.ACTIONGROUP9:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom09);
+                    break;
+
+                case CommandType.ACTIONGROUP10:
+                    v.ActionGroups.ToggleGroup(KSPActionGroup.Custom10);
+                    break;
+
+                default:
+                    Core.Log($"Unimplemented command {Type}.", LogLevel.Error);
+                    break;
+            }
         }
 
-        public Command(ConfigNode node) => ConfigNode = node;
+        public override string ToString() => $"{Type} @ {Time}";
     }
 }

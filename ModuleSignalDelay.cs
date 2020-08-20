@@ -11,29 +11,55 @@ namespace SignalDelay
         public float actualECRate = 0;
 
         double lastUpdated;
-        int resourceId;
-
-        public List<PartResourceDefinition> GetConsumedResources() => new List<PartResourceDefinition>() { PartResourceLibrary.Instance.GetDefinition("ElectricCharge") };
+        static int resourceId;
 
         ModuleDeployableAntenna deployableAntenna;
 
-        bool IsActive => SignalDelaySettings.IsECUsageEnabled && ((deployableAntenna == null) || (deployableAntenna.deployState == ModuleDeployablePart.DeployState.EXTENDED));
+        bool IsActive => SignalDelaySettings.Instance.ECUsage && ((deployableAntenna == null) || (deployableAntenna.deployState == ModuleDeployablePart.DeployState.EXTENDED));
+
+        double ConsumptionRate
+            => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.ControlPath.First.signalStrength * (1 - SignalDelaySettings.Instance.ECBonus)) : 1);
+
+        public List<PartResourceDefinition> GetConsumedResources() => new List<PartResourceDefinition>() { PartResourceLibrary.Instance.GetDefinition("ElectricCharge") };
+
+        // Kerbalism compatibility method
+        public string PlannerUpdate(List<KeyValuePair<string, double>> resources, CelestialBody body, Dictionary<string, double> environment)
+        {
+            if (IsActive)
+                resources.Add(new KeyValuePair<string, double>("ElectricCharge", -ecRate));
+            return "antenna";
+        }
+
+        // Kerbalism compatibility method
+        public static string BackgroundUpdate(Vessel v, ProtoPartSnapshot part_snapshot, ProtoPartModuleSnapshot module_snapshot, PartModule proto_part_module, Part proto_part, Dictionary<string, double> availableResources, List<KeyValuePair<string, double>> resourceChangeRequest, double elapsed_s)
+        {
+            ModuleSignalDelay module = proto_part_module as ModuleSignalDelay;
+            if (module.IsActive)
+            {
+                availableResources.TryGetValue("ElectricCharge", out double ec);
+                module.actualECRate = (float)module.ConsumptionRate;
+                resourceChangeRequest.Add(new KeyValuePair<string, double>("ElectricCharge", -module.actualECRate));
+                Core.Log($"{v.vesselName} {part_snapshot.partName}: consuming {module.ConsumptionRate:N2} EC/sec in background ({ec} EC available).");
+            }
+            else module.actualECRate = 0;
+            module.lastUpdated = Planetarium.GetUniversalTime();
+            return "antenna";
+        }
 
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
-            Core.Log("OnStart(" + state + ") in part " + part.name);
+            Core.Log($"OnStart({state}) in part {part.name}");
             resourceId = PartResourceLibrary.Instance.GetDefinition("ElectricCharge").id;
             deployableAntenna = part.FindModuleImplementing<ModuleDeployableAntenna>();
             lastUpdated = Planetarium.GetUniversalTime();
         }
 
-        double ConsumptionRate => ecRate * (vessel.Connection.IsConnected ? (1 - vessel.Connection.ControlPath.First.signalStrength * (1 - SignalDelaySettings.ECBonus)) : 1);
-
         public void FixedUpdate()
         {
             double time = Planetarium.GetUniversalTime();
-            if (time <= lastUpdated) return;
+            if (time <= lastUpdated)
+                return;
             if (IsActive)
             {
                 actualECRate = (float)ConsumptionRate;
@@ -43,6 +69,6 @@ namespace SignalDelay
             lastUpdated = time;
         }
 
-        public override string GetInfo() => "Telemetry EC Usage: up to " + ecRate + "/sec";
+        public override string GetInfo() => $"Background EC Usage: up to {ecRate}/sec";
     }
 }
