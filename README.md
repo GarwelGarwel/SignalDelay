@@ -21,6 +21,7 @@ The mod is in beta. Please report bugs via the GitHub [Issues tab](https://githu
 - [DMagic Orbital Science](https://github.com/DMagic1/Orbital-Science)
 - [Global Construction](https://forum.kerbalspaceprogram.com/index.php?/topic/154167-145-global-construction/)
 - [JX2Antenna](https://github.com/KSPSnark/JX2Antenna)
+- [Kerbalism](https://github.com/Kerbalism/Kerbalism)
 - [kOS](https://github.com/KSP-KOS/KOS) - terminal is supported, but all the commands are implemented without delay. You may use WAIT command to simulate delay.
 - [Near Future Exploration](https://github.com/ChrisAdderley/NearFutureExploration)
 - [Probes Before Crew](https://forum.kerbalspaceprogram.com/index.php?/topic/181013-16-probes-before-crew-pbc/)
