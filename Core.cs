@@ -30,9 +30,8 @@ namespace SignalDelay
         /// Formats time as a string, e.g. 876 d 5 h 43 m 21.09 s
         /// </summary>
         /// <param name="time">Time in seconds</param>
-        /// <param name="digits">Number of floating-point digits in seconds, default = 2</param>
         /// <returns></returns>
-        public static string FormatTime(double time, int digits = 2)
+        public static string FormatTime(double time)
         {
             double t = time;
             int d, m, h;
@@ -42,7 +41,7 @@ namespace SignalDelay
             {
                 d = (int)Math.Floor(t / KSPUtil.dateTimeFormatter.Day);
                 t -= d * KSPUtil.dateTimeFormatter.Day;
-                res += $"{d} d ";
+                res = $"{d} d ";
                 show0 = true;
             }
             if (show0 || t >= 3600)
@@ -58,8 +57,8 @@ namespace SignalDelay
                 t -= m * 60;
                 res += $"{m} m ";
             }
-            if (time < 1 || Math.Round(t, digits) > 0)
-                res += $"{t.ToString($"F{digits}")} s";
+            if (time < 1 || t >= 0.005)
+                res += $"{t:F2} s";
             return res;
         }
 
@@ -103,7 +102,9 @@ namespace SignalDelay
                 res += $"Wheel Steer: {flightCtrlState.wheelSteer}   ";
             if (flightCtrlState.wheelThrottle != 0)
                 res += $"Wheel Throttle: {flightCtrlState.wheelThrottle}   ";
-            return (((title != "") && (res != "")) ? title + ": " : "") + res;
+            if ((title.Length > 0) && (res.Length > 0))
+                return $"{title}: {res}";
+            return res;
         }
 
         /// <summary>

@@ -56,7 +56,7 @@ namespace SignalDelay
         /// </summary>
         public void OnVesselSwitching(Vessel from, Vessel to)
         {
-            Core.Log("OnVesselSwitching(" + from.vesselName + ", " + to.vesselName + ")");
+            Core.Log($"OnVesselSwitching('{from.vesselName}', '{to.vesselName}')");
             Active = false;
             ResetButtonState();
         }
@@ -184,7 +184,7 @@ namespace SignalDelay
 
             if (SignalDelaySettings.Instance.ShowDelay)
             {
-                delayMsg.message = "Delay: " + Core.FormatTime(Delay);
+                delayMsg.message = $"Delay: {Core.FormatTime(Delay)}";
                 ScreenMessages.PostScreenMessage(delayMsg);
             }
         }
@@ -218,7 +218,7 @@ namespace SignalDelay
             {
                 if (value == active)
                     return;
-                Core.Log("Active = " + value);
+                Core.Log($"Active = {value}");
                 active = value;
                 ResetButtonState();
                 if (active)
@@ -228,7 +228,10 @@ namespace SignalDelay
                     { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
                     Core.Log($"Cached throttle = {throttleCache}");
                     sasMode = Vessel.Autopilot.Mode;
-                    InputLockManager.SetControlLock(SignalDelaySettings.Instance.HidePartActions ? ControlTypes.ALL_SHIP_CONTROLS : ControlTypes.ALL_SHIP_CONTROLS & ~(ControlTypes.ACTIONS_ALL | ControlTypes.TWEAKABLES | ControlTypes.LINEAR), "this");
+                    ControlTypes controlLock = ControlTypes.ALL_SHIP_CONTROLS_ALLOW_UIMODE;
+                    if (!SignalDelaySettings.Instance.HidePartActions)
+                        controlLock &= ~(ControlTypes.ACTIONS_ALL | ControlTypes.TWEAKABLES | ControlTypes.LINEAR);
+                    InputLockManager.SetControlLock(controlLock, "this");
                     if (Core.IsLogging())
                         Core.ShowNotification("Signal delay activated.");
                 }
@@ -301,7 +304,7 @@ namespace SignalDelay
         void Enqueue(CommandType commandType, params object[] par)
         {
             double time = Planetarium.GetUniversalTime();
-            Core.Log("Adding command " + commandType + " at " + time + ".");
+            Core.Log($"Adding command {commandType} at {time:N2}.");
             Command c = new Command(commandType, time + Delay)
             { Params = new List<object>(par) };
             Queue.Enqueue(c);
