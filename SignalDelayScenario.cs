@@ -29,11 +29,13 @@ namespace SignalDelay
                 toolbarButton.ToolTip = "Switch Signal Delay";
                 toolbarButton.OnClick += e => { ToggleMod(); };
             }
+
             if (SignalDelaySettings.Instance.AppLauncherButton)
             {
                 icon.LoadImage(File.ReadAllBytes(System.IO.Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
                 appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
             }
+
             ResetButtonState();
 
             GameEvents.onVesselSwitching.Add(OnVesselSwitching);
@@ -72,6 +74,9 @@ namespace SignalDelay
             // Checking if kOS terminal is focused and locks control => ignoring input then
             if (InputLockManager.lockStack.ContainsKey("kOSTerminal"))
                 return;
+
+            if (!InputLockManager.lockStack.ContainsKey(ControlLockName))
+                SetControlLocks();
 
             // Checking all key presses and enqueing corresponding actions
             if (GameSettings.LAUNCH_STAGES.GetKeyDown())
@@ -202,6 +207,7 @@ namespace SignalDelay
 
         #region MOD CONTROL METHODS
 
+        const string ControlLockName = "SignalDelay";
         bool active;
 
         public bool IsConnected => Vessel?.Connection?.IsConnected ?? false;
@@ -228,17 +234,14 @@ namespace SignalDelay
                     { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
                     Core.Log($"Cached throttle = {throttleCache}");
                     sasMode = Vessel.Autopilot.Mode;
-                    ControlTypes controlLock = ControlTypes.ALL_SHIP_CONTROLS_ALLOW_UIMODE;
-                    if (!SignalDelaySettings.Instance.HidePartActions)
-                        controlLock &= ~(ControlTypes.ACTIONS_ALL | ControlTypes.TWEAKABLES | ControlTypes.LINEAR);
-                    InputLockManager.SetControlLock(controlLock, "this");
+                    SetControlLocks();
                     if (Core.IsLogging())
                         Core.ShowNotification("Signal delay activated.");
                 }
                 else
                 {
                     Vessel.OnFlyByWire -= OnFlyByWire;
-                    InputLockManager.RemoveControlLock("this");
+                    InputLockManager.RemoveControlLock(ControlLockName);
                     Core.Log($"Deactivating signal delay. Setting main throttle to {FlightCtrlState.mainThrottle} (was {Vessel.ctrlState.mainThrottle}).");
                     Vessel.ctrlState.mainThrottle = FlightCtrlState.mainThrottle;
                     if (Core.IsLogging())
@@ -256,6 +259,17 @@ namespace SignalDelay
         /// Checks whether signal delay should be applied to the active vessel
         /// </summary>
         public void CheckVessel() => Active = SignalDelaySettings.Instance.IsEnabled && IsConnected && IsProbe;
+
+        static void SetControlLocks()
+        {
+            ControlTypes controlLock = ControlTypes.ALL_SHIP_CONTROLS_ALLOW_UIMODE;
+            if (!SignalDelaySettings.Instance.HidePartActions)
+                controlLock &= ~(ControlTypes.ACTIONS_SHIP | ControlTypes.TWEAKABLES | ControlTypes.LINEAR);
+            Core.Log($"Setting control lock: {controlLock:X}");
+            InputLockManager.SetControlLock(controlLock, ControlLockName);
+            if (Core.IsLogging())
+                Core.Log(InputLockManager.PrintLockStack());
+        }
 
         /// <summary>
         /// Enables or disables the AppLauncher/Toolbar button based on vessel's control type (probe or not) and connection state
@@ -303,9 +317,9 @@ namespace SignalDelay
         /// <param name="par"></param>
         void Enqueue(CommandType commandType, params object[] par)
         {
-            double time = Planetarium.GetUniversalTime();
-            Core.Log($"Adding command {commandType} at {time:N2}.");
-            Command c = new Command(commandType, time + Delay)
+            double time = Planetarium.GetUniversalTime() + Delay;
+            Core.Log($"Adding command {commandType} at {time:F2}.");
+            Command c = new Command(commandType, time)
             { Params = new List<object>(par) };
             Queue.Enqueue(c);
         }
