@@ -43,6 +43,12 @@
       <HintPath>..\..\..\..\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="CommNetManager">
+      <HintPath>..\CommNetManager\CommNetManagerAPI Distribution\CommNetManager.dll</HintPath>
+    </Reference>
+    <Reference Include="CommNetManagerAPI">
+      <HintPath>..\CommNetManager\CommNetManagerAPI Distribution\CommNetManagerAPI.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
