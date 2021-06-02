@@ -1,4 +1,5 @@
 ﻿using CommNet;
+using CommNetManager;
 using KSP.UI.Screens;
 using System.Collections.Generic;
 using System.IO;
@@ -299,15 +300,8 @@ namespace SignalDelay
         /// </summary>
         public CommandQueue Queue
         {
-            get => Vessel.vesselModules.OfType<SignalDelayVesselModule>().FirstOrDefault()?.Queue;
-            set
-            {
-                foreach (SignalDelayVesselModule vm in Vessel.vesselModules.OfType<SignalDelayVesselModule>())
-                {
-                    vm.Queue = value;
-                    return;
-                }
-            }
+            get => Vessel.vesselModules.OfType<ModularCommNetVessel>().First().GetModuleOfType<SignalDelayVesselModule>().Queue;
+            set => Vessel.vesselModules.OfType<ModularCommNetVessel>().First().GetModuleOfType<SignalDelayVesselModule>().Queue = value; 
         }
 
         /// <summary>

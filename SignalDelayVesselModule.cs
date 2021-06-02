@@ -2,7 +2,7 @@
 
 namespace SignalDelay
 {
-    class SignalDelayVesselModule : CommNetVessel
+    class SignalDelayVesselModule : CommNetManagerAPI.ModularCommNetVesselComponent
     {
         public CommandQueue Queue { get; set; } = new CommandQueue();
 
