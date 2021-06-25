@@ -32,7 +32,7 @@ namespace SignalDelay
 
             if (SignalDelaySettings.Instance.AppLauncherButton)
             {
-                icon.LoadImage(File.ReadAllBytes(System.IO.Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
+                icon.LoadImage(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "icon128.png")));
                 appLauncherButton = ApplicationLauncher.Instance.AddModApplication(ToggleMod, ToggleMod, null, null, null, null, ApplicationLauncher.AppScenes.FLIGHT, icon);
             }
 
@@ -60,7 +60,6 @@ namespace SignalDelay
         {
             Core.Log($"OnVesselSwitching('{from.vesselName}', '{to.vesselName}')");
             Active = false;
-            ResetButtonState();
         }
 
         /// <summary>
@@ -232,7 +231,6 @@ namespace SignalDelay
                     Vessel.OnFlyByWire += OnFlyByWire;
                     FlightCtrlState = new FlightCtrlState()
                     { mainThrottle = throttleCache = Vessel.ctrlState.mainThrottle };
-                    Core.Log($"Cached throttle = {throttleCache}");
                     sasMode = Vessel.Autopilot.Mode;
                     SetControlLocks();
                     if (Core.IsLogging())
@@ -242,7 +240,6 @@ namespace SignalDelay
                 {
                     Vessel.OnFlyByWire -= OnFlyByWire;
                     InputLockManager.RemoveControlLock(ControlLockName);
-                    Core.Log($"Deactivating signal delay. Setting main throttle to {FlightCtrlState.mainThrottle} (was {Vessel.ctrlState.mainThrottle}).");
                     Vessel.ctrlState.mainThrottle = FlightCtrlState.mainThrottle;
                     if (Core.IsLogging())
                         Core.ShowNotification("Signal delay deactivated.");
@@ -346,6 +343,7 @@ namespace SignalDelay
                     CalculateDelay();
                 return delay;
             }
+
             set
             {
                 delay = value;
@@ -366,7 +364,9 @@ namespace SignalDelay
                 if (Core.IsLogging())
                     Core.Log(Core.FCSToString(FlightCtrlState, "SignalDelay FCS"));
 
-                if (Vessel.Autopilot.Enabled && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
+                if (Vessel.Autopilot.Enabled
+                    && sasMode == VesselAutopilot.AutopilotMode.StabilityAssist
+                    && (FlightCtrlState.pitch != 0 || FlightCtrlState.yaw != 0 || FlightCtrlState.roll != 0))
                 {
                     Core.Log("User is steering the vessel in StabilityAssist mode. Temporarily disabling autopilot.");
                     Vessel.Autopilot.Disable();

@@ -15,8 +15,9 @@ namespace SignalDelay
         protected override void OnLoad(ConfigNode node)
         {
             Core.Log($"Loading SignalDelayModule for {Vessel.vesselName}. Scene is {HighLogic.LoadedScene}. Active vessel is {FlightGlobals.ActiveVessel?.vesselName}.");
-            if (node.HasNode("CommandQueue"))
-                Queue = new CommandQueue(node.GetNode("CommandQueue"));
+            ConfigNode n = null;
+            if (node.TryGetNode(CommandQueue.ConfigNodeName, ref n))
+                Queue = new CommandQueue(n);
         }
     }
 }

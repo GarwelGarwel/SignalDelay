@@ -48,6 +48,9 @@ namespace SignalDelay
 
     public class Command
     {
+        public const string ConfigNodeName = "Command";
+        private const float ThrottleSensitivity = 0.01f;
+
         public Command(CommandType type, double time)
         {
             Type = type;
@@ -64,11 +67,12 @@ namespace SignalDelay
         {
             get
             {
-                ConfigNode node = new ConfigNode("Command");
+                ConfigNode node = new ConfigNode(ConfigNodeName);
                 node.AddValue("type", Type.ToString());
                 node.AddValue("time", Time);
                 return node;
             }
+
             set
             {
                 try { Type = (CommandType)Enum.Parse(typeof(CommandType), value.GetValue("type")); }
@@ -124,12 +128,12 @@ namespace SignalDelay
 
                 case CommandType.THROTTLE_DOWN:
                     SignalDelayScenario.FlightCtrlState.mainThrottle =
-                        Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 0);
+                        Math.Max(SignalDelayScenario.FlightCtrlState.mainThrottle - ThrottleSensitivity * SignalDelaySettings.Instance.ThrottleSensitivity, 0);
                     break;
 
                 case CommandType.THROTTLE_UP:
                     SignalDelayScenario.FlightCtrlState.mainThrottle =
-                        Math.Min(SignalDelayScenario.FlightCtrlState.mainThrottle + 0.01f * SignalDelaySettings.Instance.ThrottleSensitivity, 1);
+                        Math.Min(SignalDelayScenario.FlightCtrlState.mainThrottle + ThrottleSensitivity * SignalDelaySettings.Instance.ThrottleSensitivity, 1);
                     break;
 
                 case CommandType.WHEEL_STEER_LEFT:
@@ -169,7 +173,7 @@ namespace SignalDelay
                     break;
 
                 case CommandType.SAS_CHANGE_MODE:
-                    if ((Params.Count > 0) && (Params[0] is VesselAutopilot.AutopilotMode mode) && v.Autopilot.CanSetMode(mode))
+                    if (Params.Count > 0 && Params[0] is VesselAutopilot.AutopilotMode mode && v.Autopilot.CanSetMode(mode))
                         v.Autopilot.SetMode(mode);
                     break;
 

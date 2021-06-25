@@ -12,7 +12,13 @@ namespace SignalDelay
     /// <item><definition>Debug: log all information</definition></item>
     /// </list>
     /// </summary>
-    internal enum LogLevel { None = 0, Error, Important, Debug };
+    internal enum LogLevel
+    { 
+        None = 0, 
+        Error, 
+        Important, 
+        Debug 
+    };
 
     static class Core
     {
@@ -102,7 +108,7 @@ namespace SignalDelay
                 res += $"Wheel Steer: {flightCtrlState.wheelSteer}   ";
             if (flightCtrlState.wheelThrottle != 0)
                 res += $"Wheel Throttle: {flightCtrlState.wheelThrottle}   ";
-            if ((title.Length > 0) && (res.Length > 0))
+            if (title.Length > 0 && res.Length > 0)
                 return $"{title}: {res}";
             return res;
         }

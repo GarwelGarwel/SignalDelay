@@ -4,30 +4,33 @@ namespace SignalDelay
 {
     public class CommandQueue : Queue<Command>
     {
+        public const string ConfigNodeName = "CommandQueue";
+
         public CommandQueue() : base()
         { }
 
-        public CommandQueue(ConfigNode node) : base(node.CountNodes)
-            => ConfigNode = node;
+        public CommandQueue(ConfigNode node) : base(node.CountNodes) => ConfigNode = node;
 
-        public double NextCommandTime => (Count != 0) ? Peek().Time : double.PositiveInfinity;
+        public double NextCommandTime => Count != 0 ? Peek().Time : double.PositiveInfinity;
 
         public ConfigNode ConfigNode
         {
             get
             {
-                ConfigNode node = new ConfigNode("CommandQueue");
+                ConfigNode node = new ConfigNode(ConfigNodeName);
                 foreach (Command c in this)
                     node.AddNode(c.ConfigNode);
-                if (node.CountNodes > 0)
+                if (Core.IsLogging() && node.CountNodes > 0)
                     Core.Log($"{node.CountNodes} commands saved.");
                 return node;
             }
+
             set
             {
-                foreach (ConfigNode n in value.GetNodes("Command"))
+                foreach (ConfigNode n in value.GetNodes(Command.ConfigNodeName))
                     Enqueue(new Command(n));
-                Core.Log($"{value.GetNodes("Command").Length} commands loaded.");
+                if (Core.IsLogging())
+                    Core.Log($"{value.GetNodes(Command.ConfigNodeName).Length} commands loaded.");
             }
         }
 
